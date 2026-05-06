@@ -7,6 +7,9 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using ArcelikExcelApp.Views;
 using ArcelikApp.Services;
+using ArcelikExcelApp.Services;
+using ArcelikExcelApp.Models;
+using System.Collections.ObjectModel;
 
 namespace ArcelikExcelApp
 {
@@ -51,6 +54,12 @@ namespace ArcelikExcelApp
             
             // Subscribe to Modern Dialog Service
             ModernDialogService.DialogRequested += ModernDialogService_DialogRequested;
+
+            // Subscribe to Cart changes
+            CartService.Instance.CartChanged += (s, e) => {
+                Dispatcher.Invoke(() => RefreshCartUI());
+            };
+            RefreshCartUI();
             
             _ = RefreshNotificationsAsync();
 
@@ -311,8 +320,39 @@ namespace ArcelikExcelApp
 
                 btn.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
                 btn.Foreground = Brushes.White;
+                PerformNavigation(tag);
+            }
+        }
 
-                switch (tag)
+        public void NavigateToPage(string tag, object parameter = null)
+        {
+            Button targetBtn = FindButtonByTag(MenuStackPanel, tag);
+            if (targetBtn != null)
+            {
+                ResetNavButtons(MenuStackPanel);
+                targetBtn.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
+                targetBtn.Foreground = Brushes.White;
+                PerformNavigation(tag, parameter);
+            }
+        }
+
+        private Button FindButtonByTag(Panel parent, string tag)
+        {
+            foreach (var child in parent.Children)
+            {
+                if (child is Button btn && btn.Tag as string == tag) return btn;
+                if (child is Panel panel)
+                {
+                    var found = FindButtonByTag(panel, tag);
+                    if (found != null) return found;
+                }
+            }
+            return null;
+        }
+
+        private void PerformNavigation(string tag, object parameter = null)
+        {
+            switch (tag)
                 {
                     case "Anasayfa":
                         TxtPageTitle.Text = "Dashboard";
@@ -326,6 +366,14 @@ namespace ArcelikExcelApp
                         TxtPageTitle.Text = "Beyaz Eşya";
                         MainContentControl.Content = new BeyazEsyaView();
                         break;
+                    case "Tarihce":
+                        TxtPageTitle.Text = "Eski Fiyat Arşivi";
+                        if (parameter is string group)
+                            MainContentControl.Content = new TarihceView(group);
+                        else
+                            MainContentControl.Content = new TarihceView();
+                        break;
+
                     case "YeniFiyat":
                         TxtPageTitle.Text = "Maliyet Hesaplama";
                         MainContentControl.Content = new YeniFiyatView();
@@ -333,6 +381,15 @@ namespace ArcelikExcelApp
                     case "ExcelViewer":
                         TxtPageTitle.Text = "Excel Görüntüleyici";
                         MainContentControl.Content = new ExcelViewer();
+                        break;
+                    case "ManualCampaign":
+                        if (AuthService.CurrentUser?.Role != "Admin")
+                        {
+                            _ = ModernDialogService.ShowAsync("Yetki Hatası", "Bu bölüme sadece yöneticiler erişebilir.", ModernDialogType.Warning);
+                            return;
+                        }
+                        TxtPageTitle.Text = "Kampanya Yönetimi";
+                        MainContentControl.Content = new ManualCampaignView();
                         break;
                     case "UserManagement":
                         if (AuthService.CurrentUser?.Role != "Admin")
@@ -366,8 +423,126 @@ namespace ArcelikExcelApp
                         MainContentControl.Content = new SettingsView();
                         break;
                 }
+        }
+
+
+        #region Toast Logic
+        private int _toastId = 0;
+
+        public async void ShowModernToast(string message)
+        {
+            int currentId = ++_toastId;
+
+            Dispatcher.Invoke(() =>
+            {
+                TxtToastMessage.Text = message;
+                
+                // Animasyonlar - Giriş
+                var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(400));
+                var slideUp = new System.Windows.Media.Animation.DoubleAnimation(40, 0, TimeSpan.FromMilliseconds(500))
+                {
+                    EasingFunction = new System.Windows.Media.Animation.BackEase { Amplitude = 0.3, EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+                };
+
+                ToastOverlay.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                ToastTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, slideUp);
+            });
+
+            // 5 saniye bekle
+            await Task.Delay(5000);
+
+            // Eğer bu bekleme sırasında yeni bir toast çağrılmadıysa çıkış animasyonunu oynat
+            if (currentId != _toastId) return;
+
+            Dispatcher.Invoke(() =>
+            {
+                // Animasyonlar - Çıkış
+                var fadeOut = new System.Windows.Media.Animation.DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(400));
+                var slideDown = new System.Windows.Media.Animation.DoubleAnimation(0, 40, TimeSpan.FromMilliseconds(400));
+
+                ToastOverlay.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+                ToastTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, slideDown);
+            });
+        }
+        #endregion
+
+        #region Cart Logic
+        private decimal _cartDiscount = 0;
+
+        private void TxtCartDiscount_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (decimal.TryParse(TxtCartDiscount.Text, out decimal discount))
+            {
+                _cartDiscount = discount;
+            }
+            else
+            {
+                _cartDiscount = 0;
+            }
+            RefreshCartUI();
+        }
+
+        private void RefreshCartUI()
+        {
+            var cart = CartService.Instance;
+            BadgeCart.Badge = cart.Count > 0 ? (object)cart.Count : null;
+            ItemsCart.ItemsSource = null;
+            ItemsCart.ItemsSource = cart.Items;
+
+            decimal subTotal = cart.Items.Sum(i => i.SelectedPrice);
+            
+            decimal finalTotal = subTotal - _cartDiscount;
+            if (finalTotal < 0) finalTotal = 0;
+
+            decimal finalTotalCard = 0;
+
+            if (subTotal > 0)
+            {
+                foreach (var item in cart.Items)
+                {
+                    // İndirimi orantısal dağıt
+                    decimal ratio = item.SelectedPrice / subTotal;
+                    decimal itemDiscount = _cartDiscount * ratio;
+                    
+                    decimal discountedItemPrice = item.SelectedPrice - itemDiscount;
+                    if (discountedItemPrice < 0) discountedItemPrice = 0;
+
+                    // Her bir ürün için güncel iskontolu fiyatın üzerine kart vade farkını ekle
+                    finalTotalCard += discountedItemPrice * (1 + item.CardMarkupPercent / 100m);
+                }
+            }
+
+            if (TxtCartSubTotal != null)
+                TxtCartSubTotal.Text = $"{subTotal:N2} ₺";
+            if (TxtCartTotal != null)
+                TxtCartTotal.Text = $"{finalTotal:N2} ₺";
+            if (TxtCartTotalCard != null)
+                TxtCartTotalCard.Text = $"{finalTotalCard:N2} ₺";
+        }
+
+        private void BtnCart_Click(object sender, RoutedEventArgs e)
+        {
+            PopupCart.IsOpen = !PopupCart.IsOpen;
+        }
+
+        private void BtnRemoveFromCart_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is string id)
+            {
+                CartService.Instance.RemoveItem(id);
             }
         }
+
+        private void BtnClearCart_Click(object sender, RoutedEventArgs e)
+        {
+            CartService.Instance.Clear();
+            if (TxtCartDiscount != null) TxtCartDiscount.Text = string.Empty;
+            _cartDiscount = 0;
+            PopupCart.IsOpen = false;
+            ShowModernToast("Sepet temizlendi.");
+        }
+
+        #endregion
 
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
         {

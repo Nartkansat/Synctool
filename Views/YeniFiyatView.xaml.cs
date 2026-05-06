@@ -270,7 +270,34 @@ namespace ArcelikExcelApp.Views
                                           GetPricePPWG(wg, wgValor), wgValor,
                                           markupPct, campaignLookup));
                     }
+
+                    // --- Kampanyası olan ama fiyat listesinde bulunmayan ürünler ---
+                    // WhiteGoodsProducts'ta olmayıp OlizCampaigns'de olan ürün kodlarını bul
+                    var existingCodes = rows
+                        .Where(r => r.Kategori == "Beyaz Eşya")
+                        .Select(r => r.ProductCode.Trim().ToUpperInvariant())
+                        .ToHashSet();
+
+                    foreach (var kvp in campaignLookup)
+                    {
+                        if (!existingCodes.Contains(kvp.Key))
+                        {
+                            var camp = kvp.Value;
+                            // Kampanyada olan ama fiyat listesinde olmayan ürün — PricePP = 0
+                            rows.Add(BuildRow(
+                                "0",
+                                camp.ProductCode,
+                                camp.ProductDescription,
+                                camp.ProductDescription,
+                                "Beyaz Eşya",
+                                0m,                       // Fiyat bilgisi yok
+                                "Kampanya",               // Kaynak olarak "Kampanya" göster
+                                markupPct,
+                                campaignLookup));
+                        }
+                    }
                 }
+
 
                 if (!rows.Any())
                 {

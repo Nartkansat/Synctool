@@ -4,6 +4,7 @@ using ArcelikApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArcelikExcelApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505124733_AddManualCampaigns")]
+    partial class AddManualCampaigns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,76 +102,6 @@ namespace ArcelikExcelApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CostCalculations");
-                });
-
-            modelBuilder.Entity("ArcelikApp.Models.HistoricalKeaProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ArchiveDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<decimal?>("CashPrice")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExcelFileType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("PeriodMonth")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PeriodYear")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProductCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal?>("PromoCashPrice")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal?>("PromoInstall1x2")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal?>("PromoInstall1x4")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal?>("PromoInstall1x8")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("UploadedFileId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("WholesalePrice120")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal?>("WholesalePrice30")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal?>("WholesalePrice60")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal?>("WholesalePrice90")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UploadedFileId");
-
-                    b.ToTable("HistoricalKeaProducts");
                 });
 
             modelBuilder.Entity("ArcelikApp.Models.HistoricalWhiteGoodsProduct", b =>
@@ -281,12 +214,6 @@ namespace ArcelikExcelApp.Migrations
                     b.Property<string>("ExcelFileType")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("PeriodMonth")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PeriodYear")
-                        .HasColumnType("int");
 
                     b.Property<string>("ProductCode")
                         .IsRequired()
@@ -686,17 +613,6 @@ namespace ArcelikExcelApp.Migrations
                     b.HasIndex("UploadedFileId");
 
                     b.ToTable("WhiteGoodsProducts");
-                });
-
-            modelBuilder.Entity("ArcelikApp.Models.HistoricalKeaProduct", b =>
-                {
-                    b.HasOne("ArcelikApp.Models.UploadedFile", "UploadedFile")
-                        .WithMany()
-                        .HasForeignKey("UploadedFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UploadedFile");
                 });
 
             modelBuilder.Entity("ArcelikApp.Models.HistoricalWhiteGoodsProduct", b =>

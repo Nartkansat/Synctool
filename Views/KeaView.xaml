@@ -6,6 +6,9 @@
              Loaded="UserControl_Loaded"
              Focusable="True"
              PreviewKeyDown="UserControl_PreviewKeyDown">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -60,7 +63,11 @@
                       AlternatingRowBackground="#FAFAFA"
                       GridLinesVisibility="Horizontal"
                       HorizontalGridLinesBrush="#F1F5F9"
-                      materialDesign:DataGridAssist.CellPadding="12,8,12,8">
+                      materialDesign:DataGridAssist.CellPadding="12,8,12,8"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Excel'de Aç" Click="MenuItem_OpenExcel_Click">
@@ -71,6 +78,12 @@
                         <MenuItem Header="Arçelik.com.tr'de Aç" Click="MenuItem_OpenInArcelik_Click">
                             <MenuItem.Icon>
                                 <materialDesign:PackIcon Kind="Web" Foreground="#E02020"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="Eski Fiyatları Gör" Click="MenuItem_ViewHistory_Click">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="History" Foreground="#F59E0B"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
@@ -88,7 +101,7 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn x:Name="ColCardPrice"  Binding="{Binding CardPurchasePrice, StringFormat={}{0:N2} ₺}" Width="140">
+                    <DataGridTextColumn x:Name="ColCardPrice" Header="Kart Fiyatı" Binding="{Binding CardPurchasePrice, StringFormat={}{0:N2} ₺}" Width="140">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -98,15 +111,45 @@
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Tarih" Binding="{Binding CreatedDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100"/>
                     
-                    <DataGridTemplateColumn Header="Aksiyonlar" Width="100">
+                    <!-- Manuel Kampanya Butonu -->
+                    <DataGridTemplateColumn Header="Kampanya" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="BtnShowManualCampaign"
+                                        Click="BtnShowManualCampaign_Click"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Height="28" Padding="8,0" HorizontalAlignment="Center"
+                                        Visibility="{Binding HasManualCampaign, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Tag" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Kampanya" FontSize="11" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Aksiyonlar" Width="180">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                                            ToolTip="Sepete Ekle"
+                                            Width="32" Height="32"
+                                            Click="BtnAddToCart_Click">
+                                        <materialDesign:PackIcon Kind="CartPlus" Foreground="#3949AB" Width="20" Height="20"/>
+                                    </Button>
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
                                             ToolTip="Excel'de Aç"
                                             Width="32" Height="32"
                                             Click="MenuItem_OpenExcel_Click">
                                         <materialDesign:PackIcon Kind="MicrosoftExcel" Foreground="#10B981" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                                            ToolTip="Eski Fiyatları Gör"
+                                            Width="32" Height="32"
+                                            Click="MenuItem_ViewHistory_Click">
+                                        <materialDesign:PackIcon Kind="History" Foreground="#F59E0B" Width="20" Height="20"/>
                                     </Button>
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
                                             ToolTip="Arçelik.com.tr'de Aç"
@@ -143,6 +186,209 @@
                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" IsIndeterminate="True" Width="40" Height="40" Foreground="#E02020" HorizontalAlignment="Center"/>
                 <TextBlock Text="Veriler Yükleniyor..." Margin="0,12,0,0" FontWeight="SemiBold" Foreground="#1C2B4A"/>
             </StackPanel>
+        </Grid>
+
+        <!-- Manuel Kampanya Detay Overlay -->
+        <Grid x:Name="ManualCampaignOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+            <Border Background="#221A1A24">
+                <Border.Effect>
+                    <BlurEffect Radius="10"/>
+                </Border.Effect>
+            </Border>
+            <materialDesign:Card Width="500" MaxHeight="600" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="24" Background="White">
+                <materialDesign:Card.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="50" Opacity="0.1" Direction="270" ShadowDepth="10"/>
+                </materialDesign:Card.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Header -->
+                    <Border Grid.Row="0" Background="#FFF1F2" Padding="28,24" CornerRadius="24,24,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="48" Height="48" Background="#FFE4E6" CornerRadius="14">
+                                <materialDesign:PackIcon Kind="TicketPercent" Width="26" Height="26" Foreground="#E11D48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Aktif Kampanyalar" FontSize="20" FontWeight="ExtraBold" Foreground="#881337"/>
+                                <TextBlock x:Name="TxtManualCampaignProductName" Text="Ürün Bilgisi" FontSize="13" Foreground="#BE123C" Opacity="0.8" TextTrimming="CharacterEllipsis" MaxWidth="350"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Content -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="28,24">
+                            <Border Background="#F8FAFC" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="20">
+                                <TextBlock x:Name="TxtManualCampaignDescription" 
+                                           Text="Açıklama buraya gelecek." 
+                                           FontSize="15" 
+                                           LineHeight="26"
+                                           Foreground="#334155" 
+                                           TextWrapping="Wrap"
+                                           FontFamily="Segoe UI Semibold"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                    
+                    <!-- Footer -->
+                    <Border Grid.Row="2" Background="White" Padding="28,20" CornerRadius="0,0,24,24" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9">
+                        <Button Content="Anladım" HorizontalAlignment="Stretch" 
+                                Style="{StaticResource MaterialDesignFlatButton}" 
+                                Foreground="#E11D48" FontWeight="Black" FontSize="15"
+                                Height="48" materialDesign:ButtonAssist.CornerRadius="12"
+                                Click="BtnCloseManualCampaign_Click"/>
+                    </Border>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- Eski Fiyatlar Dialog Overlay -->
+        <Grid x:Name="HistoryDialogOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+            <Border Background="#221A1A24">
+                <Border.Effect>
+                    <BlurEffect Radius="10"/>
+                </Border.Effect>
+            </Border>
+            <materialDesign:Card Width="520" MaxHeight="600" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="16" Background="White">
+                <materialDesign:Card.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="30" Opacity="0.15" Direction="270" ShadowDepth="5"/>
+                </materialDesign:Card.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" Background="#FFFBEB" Padding="20,16" CornerRadius="16,16,0,0" BorderThickness="0,0,0,1" BorderBrush="#FDE68A">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="40" Height="40" Background="#FEF3C7" CornerRadius="20">
+                                    <materialDesign:PackIcon Kind="History" Width="24" Height="24" Foreground="#F59E0B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Eski Fiyatlar" FontSize="18" FontWeight="Bold" Foreground="#1A1A24"/>
+                                    <TextBlock x:Name="TxtHistoryProductName" Text="Ürün Adı" FontSize="13" Foreground="#92400E" TextTrimming="CharacterEllipsis" MaxWidth="380"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Button HorizontalAlignment="Right" Style="{StaticResource MaterialDesignIconButton}" 
+                                    Width="36" Height="36" Click="BtnCloseHistoryDialog_Click" Foreground="#94A3B8">
+                                <materialDesign:PackIcon Kind="Close" Width="22" Height="22"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="10" Padding="24,20">
+                        <StackPanel x:Name="PnlHistoryContainer">
+                            <!-- Items will be generated here in code-behind -->
+                        </StackPanel>
+                    </ScrollViewer>
+                    
+                    <Border Grid.Row="2" Background="#FAFAFA" Padding="20,16" CornerRadius="0,0,16,16" BorderThickness="0,1,0,0" BorderBrush="#E2E8F0">
+                        <Grid>
+                            <Button Content="Tüm Tarihçeyi Gör" HorizontalAlignment="Left" 
+                                    Style="{StaticResource MaterialDesignFlatButton}" 
+                                    Foreground="#F59E0B" FontWeight="Bold" Click="BtnGoToFullHistory_Click"/>
+                            <Button Content="Kapat" HorizontalAlignment="Right" 
+                                    Style="{StaticResource MaterialDesignFlatButton}" 
+                                    Foreground="#64748B" FontWeight="SemiBold" Click="BtnCloseHistoryDialog_Click"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+        
+        <!-- Manuel Fiyat Giriş Overlay -->
+        <Grid x:Name="ManualPriceOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+            <Border Background="#221A1A24">
+                <Border.Effect>
+                    <BlurEffect Radius="10"/>
+                </Border.Effect>
+            </Border>
+            <materialDesign:Card Width="350" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="20" Background="White">
+                <materialDesign:Card.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.15" Direction="270" ShadowDepth="10"/>
+                </materialDesign:Card.Effect>
+                <Border Padding="30">
+                    <StackPanel>
+                        <Border Width="50" Height="50" Background="#FFF8E1" CornerRadius="25" Margin="0,0,0,20">
+                            <materialDesign:PackIcon Kind="CashEdit" Width="26" Height="26" Foreground="#FFA000" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Text="Fiyat Giriniz" FontSize="20" FontWeight="Bold" Foreground="#1A1A24" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="Bu ürünün fiyatı 0 olduğu için lütfen manuel fiyat giriniz." FontSize="13" Foreground="#64748B" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,25"/>
+
+                        <TextBox x:Name="TxtManualPrice" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="Tutar (₺)"
+                                 FontSize="16" FontWeight="SemiBold"
+                                 Margin="0,0,0,25"
+                                 HorizontalContentAlignment="Center"/>
+
+                        <Button x:Name="BtnConfirmManualPrice" Content="Devam Et" 
+                                Style="{StaticResource MaterialDesignFlatButton}" 
+                                Foreground="#3949AB" FontWeight="Bold"
+                                Click="BtnConfirmManualPrice_Click"/>
+                        
+                        <Button Content="İptal" Style="{StaticResource MaterialDesignFlatButton}" Foreground="#EF5350" Click="BtnCancelManualPrice_Click"/>
+                    </StackPanel>
+                </Border>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- Sepet Seçim Overlay -->
+        <Grid x:Name="CartChoiceOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+            <Border Background="#221A1A24">
+                <Border.Effect>
+                    <BlurEffect Radius="10"/>
+                </Border.Effect>
+            </Border>
+            <materialDesign:Card Width="400" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="20" Background="White">
+                <materialDesign:Card.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.15" Direction="270" ShadowDepth="10"/>
+                </materialDesign:Card.Effect>
+                <Border Padding="30">
+                    <StackPanel>
+                        <Border Width="50" Height="50" Background="#E8EAF6" CornerRadius="25" Margin="0,0,0,20">
+                            <materialDesign:PackIcon Kind="CartPlus" Width="26" Height="26" Foreground="#3949AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Text="Sepete Ekle" FontSize="20" FontWeight="Bold" Foreground="#1A1A24" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="Lütfen fiyat tipini seçiniz:" FontSize="14" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+
+                        <Grid Margin="0,0,0,25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button x:Name="BtnSelectParolu" Grid.Column="0" Margin="0,0,8,0" Height="80" 
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" BorderBrush="#3949AB" Foreground="#3949AB"
+                                    Click="BtnCartChoice_Click" Tag="Parolu">
+                                <StackPanel>
+                                    <TextBlock Text="Parolu" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtParoluPrice" Text="0.00 ₺" FontSize="12" Opacity="0.8" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="BtnSelectParosuz" Grid.Column="1" Margin="8,0,0,0" Height="80" 
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" BorderBrush="#64748B" Foreground="#64748B"
+                                    Click="BtnCartChoice_Click" Tag="Parosuz">
+                                <StackPanel>
+                                    <TextBlock Text="Parosuz" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtParosuzPrice" Text="0.00 ₺" FontSize="12" Opacity="0.8" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <Button Content="İptal" Style="{StaticResource MaterialDesignFlatButton}" Foreground="#EF5350" Click="BtnCancelCartChoice_Click"/>
+                    </StackPanel>
+                </Border>
+            </materialDesign:Card>
         </Grid>
     </Grid>
 </UserControl>

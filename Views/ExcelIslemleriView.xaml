@@ -7,8 +7,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
         
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,20">
             <materialDesign:PackIcon Kind="FileExcel" Width="32" Height="32" Foreground="#4CAF50"/>
@@ -22,43 +24,73 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
+
                 <!-- Kategori Seçimi -->
-                <StackPanel Grid.Column="0" Margin="0,0,16,0" VerticalAlignment="Center">
-                    <TextBlock Text="Kategori Seçin" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="CmbCategory" Width="150"
-                              materialDesign:HintAssist.Hint="Kategori"
-                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                              SelectionChanged="CmbCategory_SelectionChanged">
-                        <ComboBoxItem Content="Kea"/>
-                        <ComboBoxItem Content="Beyaz Eşya"/>
-                        <ComboBoxItem Content="Oliz Kampanya"/>
-                    </ComboBox>
+                <ComboBox x:Name="CmbCategory" Grid.Column="0" Width="170" Margin="0,0,16,0"
+                          materialDesign:HintAssist.Hint="Kategori Seçin"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          SelectionChanged="CmbCategory_SelectionChanged"
+                          VerticalAlignment="Top">
+                    <ComboBoxItem Content="Kea"/>
+                    <ComboBoxItem Content="Beyaz Eşya"/>
+                    <ComboBoxItem Content="Oliz Kampanya"/>
+                </ComboBox>
+
+
+                <!-- Beyaz Eşya Alt Tipi -->
+                <ComboBox x:Name="CmbWhiteGoodsType" Grid.Column="1" Width="170" Margin="0,0,16,0"
+                          materialDesign:HintAssist.Hint="Ürün Tipi"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Visibility="Collapsed"
+                          VerticalAlignment="Top"/>
+
+
+
+                <!-- Oliz Çalışma Sayfası -->
+                <ComboBox x:Name="CmbWorksheet" Grid.Column="2" Width="170" Margin="0,0,16,0"
+                          materialDesign:HintAssist.Hint="Çalışma Sayfası"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Visibility="Collapsed"
+                          VerticalAlignment="Top"/>
+
+
+
+                <!-- Dönem ve Seçenekler -->
+                <StackPanel Grid.Column="3" Margin="0,0,16,0" VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox x:Name="CmbPeriodMonth" Width="105" Margin="0,0,8,0"
+                                  materialDesign:HintAssist.Hint="Ay"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                            <ComboBoxItem Content="Ocak" Tag="1"/>
+                            <ComboBoxItem Content="Şubat" Tag="2"/>
+                            <ComboBoxItem Content="Mart" Tag="3"/>
+                            <ComboBoxItem Content="Nisan" Tag="4"/>
+                            <ComboBoxItem Content="Mayıs" Tag="5"/>
+                            <ComboBoxItem Content="Haziran" Tag="6"/>
+                            <ComboBoxItem Content="Temmuz" Tag="7"/>
+                            <ComboBoxItem Content="Ağustos" Tag="8"/>
+                            <ComboBoxItem Content="Eylül" Tag="9"/>
+                            <ComboBoxItem Content="Ekim" Tag="10"/>
+                            <ComboBoxItem Content="Kasım" Tag="11"/>
+                            <ComboBoxItem Content="Aralık" Tag="12"/>
+                        </ComboBox>
+                        <ComboBox x:Name="CmbPeriodYear" Width="95"
+                                  materialDesign:HintAssist.Hint="Yıl"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+                    </StackPanel>
+                    <CheckBox x:Name="ChkIsHistory" Content="Geçmiş Fiyat Olarak Yükle" Margin="4,8,0,0"
+                              Foreground="#6B7280" FontSize="11" FontWeight="Medium"/>
                 </StackPanel>
 
-                <!-- Beyaz Eşya Alt Tipi (sadece Beyaz Eşya seçilince görünür) -->
-                <StackPanel Grid.Column="1" Margin="0,0,16,0" VerticalAlignment="Center"
-                            x:Name="PnlWhiteGoodsType" Visibility="Collapsed">
-                    <TextBlock Text="Ürün Tipi" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="CmbWhiteGoodsType" Width="170"
-                              materialDesign:HintAssist.Hint="Tip Seçin"
-                              Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
-                </StackPanel>
-
-                <!-- Oliz Çalışma Sayfası (sadece Oliz seçilince görünür) -->
-                <StackPanel Grid.Column="2" Margin="0,0,16,0" VerticalAlignment="Center"
-                            x:Name="PnlWorksheet" Visibility="Collapsed">
-                    <TextBlock Text="Çalışma Sayfası Seçin" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="CmbWorksheet" Width="150"
-                              materialDesign:HintAssist.Hint="Sayfa Seç"
-                              Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
-                </StackPanel>
 
                 <!-- Dosya Yükleme Alanı -->
-                <Border Grid.Column="3" BorderBrush="#D1D5DB" BorderThickness="2" CornerRadius="8"
+                <Border Grid.Column="4" BorderBrush="#D1D5DB" BorderThickness="2" CornerRadius="8"
+
                         Background="Transparent" Padding="20" AllowDrop="True"
                         Drop="Border_Drop" Cursor="Hand" MouseLeftButtonDown="Border_MouseLeftButtonDown">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -68,12 +100,14 @@
                     </StackPanel>
                 </Border>
 
-                <Button x:Name="BtnUpload" Grid.Column="4"
+                <Button x:Name="BtnUpload"
                         Content="Yükle ve İşle"
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         Background="#E02020" BorderBrush="Transparent" Foreground="White"
                         Width="120" Height="45" Margin="20,0,0,0"
-                        Click="BtnUpload_Click" VerticalAlignment="Center"/>
+                        Click="BtnUpload_Click" VerticalAlignment="Center" Grid.Column="5"/>
+
+
             </Grid>
         </Border>
 

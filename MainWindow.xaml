@@ -15,6 +15,7 @@
         <converters:BooleanToReadBackgroundConverter x:Key="BooleanToReadBackgroundConverter"/>
         <converters:NotificationTypeToColorConverter x:Key="NotificationTypeToColorConverter"/>
         <converters:NotificationTypeToIconConverter x:Key="NotificationTypeToIconConverter"/>
+        <converters:ParoluTextConverter x:Key="ParoluTextConverter"/>
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
@@ -46,7 +47,50 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Modern ScrollBar Style for Sidebar -->
+        <Style x:Key="ModernSidebarScrollBar" TargetType="{x:Type ScrollBar}">
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false" />
+            <Setter Property="Stylus.IsFlicksEnabled" Value="false" />
+            <Setter Property="Width" Value="7" />
+            <Setter Property="Margin" Value="0,0,2,0" />
+            <Setter Property="MinWidth" Value="7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
+                            <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}">
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                <Border x:Name="ThumbBorder" 
+                                                        Background="#666A7D" 
+                                                        Opacity="0.3"
+                                                        CornerRadius="3.5" 
+                                                        Margin="1,0,1,0" />
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="true">
+                                                        <Setter TargetName="ThumbBorder" Property="Opacity" Value="0.7" />
+                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="#A0A5B1" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsDragging" Value="true">
+                                                        <Setter TargetName="ThumbBorder" Property="Opacity" Value="0.9" />
+                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="#E02020" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
+
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -83,7 +127,15 @@
                 </Grid>
 
                 <!-- Navigation -->
-                <StackPanel x:Name="MenuStackPanel" Grid.Row="1" Margin="0,10,0,0">
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" 
+                              materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernSidebarScrollBar}"/>
+                    </ScrollViewer.Resources>
+                    <StackPanel x:Name="MenuStackPanel" Margin="0,10,0,0">
+
+
+
                     <TextBlock Text="ANA MENÜ" Foreground="#666A7D" FontSize="12" FontWeight="SemiBold" Margin="25,0,0,15"
                                Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
@@ -105,7 +157,7 @@
                                 <ColumnDefinition Width="65"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <materialDesign:PackIcon Grid.Column="0" Kind="CoffeeMaker" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <materialDesign:PackIcon Grid.Column="0" Kind="Blender" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="Küçük Ev Aletleri" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"
                                        Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Grid>
@@ -115,13 +167,26 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="65"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="186"/>
                             </Grid.ColumnDefinitions>
                             <materialDesign:PackIcon Grid.Column="0" Kind="WashingMachine" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="Beyaz Eşya" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"
                                        Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Grid>
                     </Button>
+
+                    <Button Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="Tarihce" ToolTip="Eski Fiyat Arşivi">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="65"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon Grid.Column="0" Kind="MoneyOff" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Eski Fiyatlar" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"
+                                       Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Grid>
+                    </Button>
+
 
                     <Button x:Name="BtnExcelViewer" Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="ExcelViewer" ToolTip="Excel Görüntüleyici">
                         <Grid>
@@ -138,6 +203,18 @@
                     <StackPanel x:Name="AdminSection">
                         <TextBlock Text="İŞLEMLER" Foreground="#666A7D" FontSize="12" FontWeight="SemiBold" Margin="25,25,0,15"
                                    Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                        <Button x:Name="BtnManualCampaign" Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="ManualCampaign" ToolTip="Kampanya Yönetimi">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="65"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon Grid.Column="0" Kind="TagPlus" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Kampanya Yönetimi" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"
+                                           Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Button>
 
                         <Button x:Name="BtnCalculator" Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="YeniFiyat" ToolTip="Maliyet Hesaplama">
                             <Grid>
@@ -202,6 +279,8 @@
                         </Grid>
                     </Button>
                 </StackPanel>
+                </ScrollViewer>
+
 
                 <!-- Footer Profile -->
                 <Border Grid.Row="2" Margin="10,20,10,20" Background="#232635" CornerRadius="12" Padding="10">
@@ -258,6 +337,14 @@
                 <TextBlock Grid.Column="1" x:Name="TxtPageTitle" Text="Dashboard" FontSize="32" FontWeight="Bold" Foreground="#1A1A24" VerticalAlignment="Center"/>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Modern Cart Icon with Badge -->
+                    <materialDesign:Badged x:Name="BadgeCart" Badge="0" BadgeBackground="#E02020" BadgeForeground="White" Margin="0,0,15,0">
+                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" 
+                                Background="White" BorderBrush="Transparent" Click="BtnCart_Click">
+                            <materialDesign:PackIcon Kind="CartOutline" Foreground="#666A7D" Width="20" Height="20"/>
+                        </Button>
+                    </materialDesign:Badged>
+
                     <!-- Modern Notification Bell with Badge -->
                     <materialDesign:Badged x:Name="BadgeNotifications" Badge="0" BadgeBackground="Red" BadgeForeground="White" Margin="0,0,15,0">
                         <Button Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" 
@@ -265,6 +352,123 @@
                             <materialDesign:PackIcon Kind="BellOutline" Foreground="#666A7D" Width="20" Height="20"/>
                         </Button>
                     </materialDesign:Badged>
+
+                    <!-- Cart Popup Panel -->
+                    <Popup x:Name="PopupCart" AllowsTransparency="True" StaysOpen="False" 
+                           Placement="Bottom" PlacementTarget="{Binding ElementName=BadgeCart}"
+                           PopupAnimation="Fade" VerticalOffset="12" HorizontalOffset="-20">
+                        <materialDesign:Card Width="400" MaxHeight="580" UniformCornerRadius="20" Background="White" 
+                                           materialDesign:ElevationAssist.Elevation="Dp16" Margin="0,0,25,25">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Header -->
+                                <Border Grid.Row="0" Padding="24,20,24,16" Background="Transparent" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="ShoppingOutline" Width="24" Height="24" Foreground="#1E293B" Margin="0,0,10,0"/>
+                                            <TextBlock Text="Sepetim" FontSize="20" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Button HorizontalAlignment="Right" Content="Temizle" 
+                                                Style="{StaticResource MaterialDesignFlatButton}" Foreground="#EF4444" 
+                                                FontSize="13" FontWeight="SemiBold" Padding="12,0" Height="32" Click="BtnClearCart_Click"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Items List -->
+                                <ScrollViewer Grid.Row="1" MaxHeight="360" VerticalScrollBarVisibility="Auto" Padding="0,5">
+                                    <ItemsControl x:Name="ItemsCart">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="24,18" Background="Transparent" BorderBrush="#F8FAFC" BorderThickness="0,0,0,1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <!-- Product Icon -->
+                                                        <Border Width="48" Height="48" CornerRadius="14" Background="#F1F5F9" VerticalAlignment="Top">
+                                                            <materialDesign:PackIcon Kind="PackageVariant" Foreground="#64748B"
+                                                                                     Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+
+                                                        <!-- Product Details -->
+                                                        <StackPanel Grid.Column="1" Margin="16,0,10,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" FontSize="15" Foreground="#1E293B" TextWrapping="Wrap" LineHeight="20"/>
+                                                            <TextBlock Text="{Binding ProductCode}" FontSize="13" Foreground="#94A3B8" Margin="0,2,0,0"/>
+                                                            
+                                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding SelectedPrice, StringFormat={}{0:N2} ₺}" FontWeight="ExtraBold" Foreground="#E02020" FontSize="16"/>
+                                                                <Border Background="#EFF6FF" CornerRadius="6" Margin="10,0,0,0" Padding="8,3" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding IsParolu, Converter={StaticResource ParoluTextConverter}}" FontSize="11" Foreground="#3B82F6" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <!-- Remove Button -->
+                                                        <Button Grid.Column="2" Style="{StaticResource MaterialDesignIconForegroundButton}" 
+                                                                Width="32" Height="32" Padding="0" VerticalAlignment="Top" HorizontalAlignment="Right"
+                                                                Click="BtnRemoveFromCart_Click" Tag="{Binding Id}" ToolTip="Sepetten Çıkar"
+                                                                Foreground="#CBD5E1">
+                                                            <materialDesign:PackIcon Kind="CloseThick" Width="16" Height="16"/>
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+
+                                <!-- Footer -->
+                                <Border Grid.Row="2" Padding="24" Background="#F8FAFC" CornerRadius="0,0,20,20">
+                                    <StackPanel>
+                                        <!-- Ara Toplam -->
+                                        <Grid Margin="0,0,0,10">
+                                            <TextBlock Text="Ara Toplam" FontSize="14" Foreground="#64748B" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtCartSubTotal" Text="0,00 ₺" HorizontalAlignment="Right" FontSize="16" FontWeight="SemiBold" Foreground="#475569"/>
+                                        </Grid>
+                                        
+                                        <!-- İndirim Girişi -->
+                                        <Grid Margin="0,0,0,16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="100"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="İndirim (₺):" FontSize="14" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                            <TextBox x:Name="TxtCartDiscount" Grid.Column="2" 
+                                                     materialDesign:HintAssist.Hint="0,00" 
+                                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                     HorizontalContentAlignment="Right"
+                                                     Padding="8,5" Height="32"
+                                                     TextChanged="TxtCartDiscount_TextChanged"/>
+                                        </Grid>
+
+                                        <Border BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Margin="0,0,0,16"/>
+
+                                        <!-- Genel Toplam (Nakit) -->
+                                        <Grid Margin="0,0,0,8">
+                                            <TextBlock Text="Genel Toplam (Nakit)" FontSize="15" FontWeight="Medium" Foreground="#64748B" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtCartTotal" Text="0,00 ₺" HorizontalAlignment="Right" FontSize="20" FontWeight="Black" Foreground="#0F172A"/>
+                                        </Grid>
+
+                                        <!-- Genel Toplam (Kart) -->
+                                        <Grid>
+                                            <TextBlock Text="Genel Toplam (Kart)" FontSize="15" FontWeight="Medium" Foreground="#64748B" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtCartTotalCard" Text="0,00 ₺" HorizontalAlignment="Right" FontSize="20" FontWeight="Black" Foreground="#E02020"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </materialDesign:Card>
+                    </Popup>
+
 
                     <!-- Notification Popup Panel -->
                     <Popup x:Name="PopupNotifications" AllowsTransparency="True" StaysOpen="False" 
@@ -341,27 +545,23 @@
                 <ContentControl x:Name="MainContentControl" Margin="20"/>
             </Border>
 
-            <!-- Modern Global Snackbar -->
-            <materialDesign:Snackbar x:Name="MainSnackbar" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,20,20,0" MessageQueue="{materialDesign:MessageQueue}">
-                <materialDesign:Snackbar.Resources>
-                    <Style TargetType="materialDesign:SnackbarMessage">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="materialDesign:SnackbarMessage">
-                                    <materialDesign:Card UniformCornerRadius="12" Background="White" Padding="20,12" materialDesign:ElevationAssist.Elevation="Dp3" BorderBrush="#4CAF50" BorderThickness="0,0,0,3">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="CheckCircleOutline" Foreground="#4CAF50" Width="24" Height="24" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" 
-                                                       Foreground="#1A1A24" FontWeight="SemiBold" FontSize="14" 
-                                                       Margin="15,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </materialDesign:Card>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </materialDesign:Snackbar.Resources>
-            </materialDesign:Snackbar>
+            <!-- Premium Toast Overlay (Bottom Right) -->
+            <Grid x:Name="ToastOverlay" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,30,40" Opacity="0" IsHitTestVisible="False">
+                <materialDesign:Card UniformCornerRadius="15" Background="#1A1A24" Padding="20,15" materialDesign:ElevationAssist.Elevation="Dp8">
+                    <materialDesign:Card.Effect>
+                        <DropShadowEffect Color="#000000" BlurRadius="20" Opacity="0.4" ShadowDepth="4"/>
+                    </materialDesign:Card.Effect>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="32" Height="32" Background="#10B981" CornerRadius="16" Margin="0,0,15,0">
+                            <materialDesign:PackIcon Kind="Check" Foreground="White" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock x:Name="TxtToastMessage" Text="Ürün sepete eklendi" Foreground="White" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </materialDesign:Card>
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="ToastTranslate" Y="40"/>
+                </Grid.RenderTransform>
+            </Grid>
         </Grid>
         <!-- Global Modern Dialog Overlay -->
         <Grid x:Name="ModernDialogOverlay" Grid.ColumnSpan="2" Visibility="Collapsed">

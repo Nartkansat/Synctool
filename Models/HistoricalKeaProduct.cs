@@ -1,10 +1,16 @@
+using System;
+
 namespace ArcelikApp.Models
 {
-    public class KeaProduct
+    public class HistoricalKeaProduct
     {
         public int Id { get; set; }
+
+        // --- Dönem Bilgisi ---
         public int PeriodMonth { get; set; }
         public int PeriodYear { get; set; }
+        public DateTime ArchiveDate { get; set; } = DateTime.Now;
+
         public string ExcelFileType { get; set; } = string.Empty; // "Mutfak", "SupurgeUtu"
         public string ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
@@ -27,4 +33,3 @@ namespace ArcelikApp.Models
         public UploadedFile? UploadedFile { get; set; }
     }
 }
-

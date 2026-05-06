@@ -31,7 +31,24 @@ namespace ArcelikExcelApp.Views
 
             if (CmbWhiteGoodsType.Items.Count > 0)
                 CmbWhiteGoodsType.SelectedIndex = 0;
+
+            // Dönem bilgilerini doldur
+            InitializePeriodControls();
         }
+
+        private void InitializePeriodControls()
+        {
+            // Yılları doldur (Geçen yıl, bu yıl, gelecek yıl)
+            int currentYear = DateTime.Now.Year;
+            for (int y = currentYear - 1; y <= currentYear + 1; y++)
+                CmbPeriodYear.Items.Add(y);
+            CmbPeriodYear.SelectedItem = currentYear;
+
+            // Ayı seç (1-indexed tag kullanıyoruz)
+            int currentMonth = DateTime.Now.Month;
+            CmbPeriodMonth.SelectedIndex = currentMonth - 1;
+        }
+
 
         // ─── Dosya Seçimi ─────────────────────────────────────────────────────────────
         private void Border_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -70,11 +87,13 @@ namespace ArcelikExcelApp.Views
             var selectedItem = CmbCategory.SelectedItem as ComboBoxItem;
             string category  = selectedItem?.Content?.ToString() ?? "";
 
-            PnlWorksheet.Visibility      = (category == "Oliz Kampanya") ? Visibility.Visible : Visibility.Collapsed;
+            CmbWorksheet.Visibility = (category == "Oliz Kampanya" || category == "Oliz Paket Kampanya")
+                ? Visibility.Visible : Visibility.Collapsed;
             
             // Beyaz Eşya veya Kea seçilirse Tip panelini göster
             bool showTypePanel = (category == "Beyaz Eşya" || category == "Kea");
-            PnlWhiteGoodsType.Visibility = showTypePanel ? Visibility.Visible : Visibility.Collapsed;
+            CmbWhiteGoodsType.Visibility = showTypePanel ? Visibility.Visible : Visibility.Collapsed;
+
 
             if (showTypePanel)
             {
@@ -95,7 +114,8 @@ namespace ArcelikExcelApp.Views
             if (string.IsNullOrEmpty(_selectedFilePath) || !File.Exists(_selectedFilePath)) return;
 
             var selectedItem = CmbCategory.SelectedItem as ComboBoxItem;
-            if (selectedItem?.Content?.ToString() != "Oliz Kampanya") return;
+            string? cat = selectedItem?.Content?.ToString();
+            if (cat != "Oliz Kampanya") return;
 
             CmbWorksheet.Items.Clear();
 
@@ -150,7 +170,6 @@ namespace ArcelikExcelApp.Views
                 worksheetName = CmbWorksheet.SelectedItem.ToString()!;
             }
 
-            // Beyaz Eşya veya Kea: alt tip seçili mi?
             string whiteGoodsType = "";
             if (categoryName == "Beyaz Eşya" || categoryName == "Kea")
             {
@@ -162,7 +181,17 @@ namespace ArcelikExcelApp.Views
                 whiteGoodsType = CmbWhiteGoodsType.SelectedItem.ToString()!;
             }
 
+
+            // Dönem bilgisini al
+            int selectedMonth = 1;
+            if (CmbPeriodMonth.SelectedItem is ComboBoxItem monthItem)
+                selectedMonth = int.Parse(monthItem.Tag.ToString()!);
+            
+            int selectedYear = (int)CmbPeriodYear.SelectedItem;
+            bool isHistoryMode = ChkIsHistory.IsChecked ?? false;
+
             // Uzantı kontrolü (.xlsx)
+
             string extension = System.IO.Path.GetExtension(_selectedFilePath).ToLower();
             if (extension != ".xlsx")
             {
@@ -170,14 +199,50 @@ namespace ArcelikExcelApp.Views
                 return;
             }
 
-            // İsim çakışması kontrolü
-            string fileName = System.IO.Path.GetFileName(_selectedFilePath);
-            using (var context = new ArcelikApp.Data.AppDbContext())
+            // Geçmiş fiyat modunda değilse dosya adı çakışma kontrolü yap
+            if (!isHistoryMode)
             {
-                if (context.UploadedFiles.Any(f => f.FileName == fileName))
+                string fileName = System.IO.Path.GetFileName(_selectedFilePath);
+                using (var context = new ArcelikApp.Data.AppDbContext())
                 {
-                    await ModernDialogService.ShowAsync("Dosya Zaten Mevcut", $"'{fileName}' isimli bir dosya zaten yüklü. Lütfen farklı bir isimle deneyin veya mevcut dosyayı Dosya Yönetimi panelinden silin.", ModernDialogType.Warning);
-                    return;
+                    if (context.UploadedFiles.Any(f => f.FileName == fileName))
+                    {
+                        await ModernDialogService.ShowAsync("Dosya Zaten Mevcut", $"'{fileName}' isimli bir dosya zaten yüklü. Lütfen farklı bir isimle deneyin veya mevcut dosyayı Dosya Yönetimi panelinden silin.", ModernDialogType.Warning);
+                        return;
+                    }
+                }
+            }
+
+            // Geçmiş fiyat modunda, aynı ay/yıl/tip kombinasyonu zaten mevcut mu kontrol et
+            if (isHistoryMode && (categoryName == "Beyaz Eşya" || categoryName == "Kea"))
+            {
+                using (var context = new ArcelikApp.Data.AppDbContext())
+                {
+                    bool alreadyExists = false;
+                    if (categoryName == "Beyaz Eşya")
+                    {
+                        alreadyExists = context.HistoricalWhiteGoodsProducts
+                            .Any(h => h.ExcelFileType == whiteGoodsType
+                                   && h.PeriodMonth == selectedMonth
+                                   && h.PeriodYear == selectedYear);
+                    }
+                    else if (categoryName == "Kea")
+                    {
+                        alreadyExists = context.HistoricalKeaProducts
+                            .Any(h => h.ExcelFileType == whiteGoodsType
+                                   && h.PeriodMonth == selectedMonth
+                                   && h.PeriodYear == selectedYear);
+                    }
+
+                    if (alreadyExists)
+                    {
+                        string monthName = ((ComboBoxItem)CmbPeriodMonth.SelectedItem).Content.ToString();
+                        await ModernDialogService.ShowAsync(
+                            "Kayıt Zaten Mevcut",
+                            $"'{whiteGoodsType}' için {monthName} {selectedYear} dönemine ait geçmiş fiyat kaydı zaten mevcut. Aynı dönem tekrar eklenemez.",
+                            ModernDialogType.Warning);
+                        return;
+                    }
                 }
             }
 
@@ -199,50 +264,58 @@ namespace ArcelikExcelApp.Views
                 {
                     using var context = new AppDbContext();
 
-                    // Dosyayı uygulama içine kopyala ve göreli yolu al
-                    string relativePath = FileHelper.CopyToStorage(_selectedFilePath);
+                    int fileId;
 
-                    var newFile = new UploadedFile
+                    if (isHistoryMode)
                     {
-                        FileName   = Path.GetFileName(_selectedFilePath),
-                        FilePath   = relativePath,
-                        FileData   = File.ReadAllBytes(_selectedFilePath),
-                        Category   = categoryName,
-                        UploadDate = DateTime.Now.ToString("dd.MM.yyyy")
-                    };
-                    context.UploadedFiles.Add(newFile);
-                    context.SaveChanges();
+                        // Geçmiş fiyat modunda dosyayı sisteme KAYDETME — sadece işle
+                        fileId = 0; // dosya referansı yok
 
-                    // ilgili excell açıksa program hatası verir. burada bir sorgu
-
-                    // İşleme için artık kopyalanan dosyayı kullanabiliriz
-                    string absoluteStoragePath = FileHelper.GetAbsolutePath(relativePath);
-                    
-                    // Geçici olarak _selectedFilePath'i bu yeni yol ile güncelleyelim ki işlemci oradan okusun
-                    // (Veya metodlara parametre olarak geçebiliriz, ama mevcut yapıyı en az bozacak şekilde bu)
-                    string originalPath = _selectedFilePath;
-                    _selectedFilePath = absoluteStoragePath;
-
-                    if (categoryName == "Oliz Kampanya")
-                    {
-                        ProcessOlizExcel(context, newFile.Id, worksheetName);
+                        if (categoryName == "Beyaz Eşya")
+                            importedCount = ProcessWhiteGoodsExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: true);
+                        else if (categoryName == "Kea")
+                            importedCount = ProcessKeaExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: true);
                     }
-                    else if (categoryName == "Beyaz Eşya")
+                    else
                     {
-                        importedCount = ProcessWhiteGoodsExcel(context, newFile.Id, whiteGoodsType);
+                        // Normal mod: dosyayı uygulama içine kopyala ve kaydet
+                        string relativePath = FileHelper.CopyToStorage(_selectedFilePath);
+
+                        var newFile = new UploadedFile
+                        {
+                            FileName   = Path.GetFileName(_selectedFilePath),
+                            FilePath   = relativePath,
+                            FileData   = File.ReadAllBytes(_selectedFilePath),
+                            Category   = categoryName,
+                            UploadDate = DateTime.Now.ToString("dd.MM.yyyy")
+                        };
+                        context.UploadedFiles.Add(newFile);
+                        context.SaveChanges();
+                        fileId = newFile.Id;
+
+                        // İşleme için artık kopyalanan dosyayı kullanabiliriz
+                        string absoluteStoragePath = FileHelper.GetAbsolutePath(relativePath);
+
+                        string originalPath = _selectedFilePath;
+                        _selectedFilePath = absoluteStoragePath;
+
+                        if (categoryName == "Oliz Kampanya")
+                            ProcessOlizExcel(context, fileId, worksheetName);
+                        else if (categoryName == "Beyaz Eşya")
+                            importedCount = ProcessWhiteGoodsExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: false);
+                        else if (categoryName == "Kea")
+                            importedCount = ProcessKeaExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: false);
+
+                        _selectedFilePath = originalPath;
                     }
-                    else if (categoryName == "Kea")
-                    {
-                        importedCount = ProcessKeaExcel(context, newFile.Id, whiteGoodsType);
-                    }
-                    // İşlem bitti, yolu geri alalım (temizlik için gerekirse)
-                    _selectedFilePath = originalPath;
                 });
 
                 if (categoryName == "Beyaz Eşya" || categoryName == "Kea")
                     await ModernDialogService.ShowAsync("Başarılı", $"✅ {whiteGoodsType}: {importedCount} ürün başarıyla kaydedildi.", ModernDialogType.Success);
                 else if (categoryName == "Oliz Kampanya")
                     await ModernDialogService.ShowAsync("Başarılı", "✅ Oliz Kampanya verileri başarıyla yüklendi.", ModernDialogType.Success);
+                else if (categoryName == "Oliz Paket Kampanya")
+                    await ModernDialogService.ShowAsync("Başarılı", $"✅ {importedCount} paket kampanya başarıyla yüklendi.", ModernDialogType.Success);
                 else
                     MainSnackbar.MessageQueue?.Enqueue($"{categoryName} dosyası yüklendi.");
             }
@@ -268,9 +341,10 @@ namespace ArcelikExcelApp.Views
         }
 
         // ─── Beyaz Eşya Excel İşleme ──────────────────────────────────────────────────
-        private int ProcessWhiteGoodsExcel(AppDbContext context, int fileId, string whiteGoodsType)
+        private int ProcessWhiteGoodsExcel(AppDbContext context, int fileId, string whiteGoodsType, int month, int year, bool isHistoryOnly)
         {
             // 1. Profile bul
+
             var profile = ColumnMappingRegistry.GetProfile(whiteGoodsType);
             if (profile == null)
                 throw new InvalidOperationException($"'{whiteGoodsType}' için kolon profili bulunamadı.");
@@ -306,7 +380,7 @@ namespace ArcelikExcelApp.Views
             var processor = new WhiteGoodsExcelProcessor();
 
             // 2. Processor'ı çalıştır
-            var products = processor.Process(worksheet, profile, fileId);
+            var products = processor.Process(worksheet, profile, fileId, month, year);
 
             if (products.Count == 0)
             {
@@ -317,14 +391,92 @@ namespace ArcelikExcelApp.Views
             }
 
             // 3. Veritabanına kaydet
-            context.WhiteGoodsProducts.AddRange(products);
+            if (isHistoryOnly)
+            {
+                // Sadece tarihçe tablosuna ekle
+                var historyProducts = products.Select(p => MapToHistory(p, month, year)).ToList();
+                context.HistoricalWhiteGoodsProducts.AddRange(historyProducts);
+            }
+            else
+            {
+                // Güncel liste olarak yükle. 
+                // Önce içeride başka bir ayın verisi varsa onu arşivle.
+                ArchiveExistingDataIfNewer(context, month, year, whiteGoodsType);
+
+                // Bu kategori için mevcut güncel verileri sil (aynı ayın tekrar yüklenmesi durumu)
+                var existingCurrent = context.WhiteGoodsProducts
+                    .Where(p => p.ExcelFileType == whiteGoodsType && p.PeriodMonth == month && p.PeriodYear == year)
+                    .ToList();
+                if (existingCurrent.Any())
+                    context.WhiteGoodsProducts.RemoveRange(existingCurrent);
+
+                context.WhiteGoodsProducts.AddRange(products);
+            }
+
             context.SaveChanges();
 
             return products.Count;
         }
 
+        private void ArchiveExistingDataIfNewer(AppDbContext context, int newMonth, int newYear, string category)
+        {
+            // Mevcut güncel verileri bul
+            var currentData = context.WhiteGoodsProducts
+                .Where(p => p.ExcelFileType == category)
+                .ToList();
+
+            if (!currentData.Any()) return;
+
+            var first = currentData.First();
+            
+            // Eğer veritabanındaki veri, yeni gelenden daha eskiyse arşivle
+            bool isOlder = (first.PeriodYear < newYear) || (first.PeriodYear == newYear && first.PeriodMonth < newMonth);
+
+            if (isOlder)
+            {
+                var historyEntries = currentData.Select(p => MapToHistory(p, p.PeriodMonth, p.PeriodYear)).ToList();
+                context.HistoricalWhiteGoodsProducts.AddRange(historyEntries);
+                
+                // Arşivledikten sonra güncel tablodan bu kategoriyi temizle (çünkü yeni ayın verisi gelecek)
+                context.WhiteGoodsProducts.RemoveRange(currentData);
+                context.SaveChanges();
+            }
+        }
+
+        private HistoricalWhiteGoodsProduct MapToHistory(WhiteGoodsProduct p, int month, int year)
+        {
+            return new HistoricalWhiteGoodsProduct
+            {
+                PeriodMonth = month,
+                PeriodYear = year,
+                ArchiveDate = DateTime.Now,
+                ExcelFileType = p.ExcelFileType,
+                ProductCode = p.ProductCode,
+                ProductName = p.ProductName,
+                Description = p.Description,
+                EnergyClass = p.EnergyClass,
+                CashPrice = p.CashPrice,
+                WholesalePrice30 = p.WholesalePrice30,
+                WholesalePrice60 = p.WholesalePrice60,
+                WholesalePrice90 = p.WholesalePrice90,
+                WholesalePrice120 = p.WholesalePrice120,
+                Installment2Down = p.Installment2Down,
+                Installment2Total = p.Installment2Total,
+                Installment4Down = p.Installment4Down,
+                Installment4Total = p.Installment4Total,
+                Installment8Down = p.Installment8Down,
+                Installment8Total = p.Installment8Total,
+                PromoCashPrice = p.PromoCashPrice,
+                PromoInstall1x2 = p.PromoInstall1x2,
+                PromoInstall1x4 = p.PromoInstall1x4,
+                PromoInstall1x8 = p.PromoInstall1x8,
+                UploadedFileId = p.UploadedFileId
+            };
+        }
+
+
         // ─── KEA Excel İşleme ─────────────────────────────────────────────────────────
-        private int ProcessKeaExcel(AppDbContext context, int fileId, string keaType)
+        private int ProcessKeaExcel(AppDbContext context, int fileId, string keaType, int month, int year, bool isHistoryOnly)
         {
             var profile = ColumnMappingRegistry.GetProfile(keaType);
             if (profile == null)
@@ -337,16 +489,88 @@ namespace ArcelikExcelApp.Views
                 throw new InvalidOperationException("Excel dosyasında veri içeren bir çalışma sayfası bulunamadı.");
 
             var processor = new KeaExcelProcessor();
-            var products = processor.Process(worksheet, profile, fileId);
+            var products = processor.Process(worksheet, profile, fileId, month, year);
 
             if (products.Count == 0)
                 throw new InvalidOperationException($"'{worksheet.Name}' sayfasından veri okunamadı.");
 
-            context.KeaProducts.AddRange(products);
+            // 3. Veritabanına kaydet
+            if (isHistoryOnly)
+            {
+                // Sadece tarihçe tablosuna ekle
+                var historyProducts = products.Select(p => MapToKeaHistory(p, month, year)).ToList();
+                context.HistoricalKeaProducts.AddRange(historyProducts);
+            }
+            else
+            {
+                // Güncel liste olarak yükle. 
+                // Önce içeride başka bir ayın verisi varsa onu arşivle.
+                ArchiveExistingKeaDataIfNewer(context, month, year, keaType);
+
+                // Bu kategori için mevcut güncel verileri sil (aynı ayın tekrar yüklenmesi durumu)
+                var existingCurrent = context.KeaProducts
+                    .Where(p => p.ExcelFileType == keaType && p.PeriodMonth == month && p.PeriodYear == year)
+                    .ToList();
+                if (existingCurrent.Any())
+                    context.KeaProducts.RemoveRange(existingCurrent);
+
+                context.KeaProducts.AddRange(products);
+            }
+
             context.SaveChanges();
 
             return products.Count;
         }
+
+        private void ArchiveExistingKeaDataIfNewer(AppDbContext context, int newMonth, int newYear, string category)
+        {
+            // Mevcut güncel verileri bul
+            var currentData = context.KeaProducts
+                .Where(p => p.ExcelFileType == category)
+                .ToList();
+
+            if (!currentData.Any()) return;
+
+            var first = currentData.First();
+
+            // Eğer veritabanındaki veri, yeni gelenden daha eskiyse arşivle
+            bool isOlder = (first.PeriodYear < newYear) || (first.PeriodYear == newYear && first.PeriodMonth < newMonth);
+
+            if (isOlder)
+            {
+                var historyEntries = currentData.Select(p => MapToKeaHistory(p, p.PeriodMonth, p.PeriodYear)).ToList();
+                context.HistoricalKeaProducts.AddRange(historyEntries);
+
+                // Arşivledikten sonra güncel tablodan bu kategoriyi temizle (çünkü yeni ayın verisi gelecek)
+                context.KeaProducts.RemoveRange(currentData);
+                context.SaveChanges();
+            }
+        }
+
+        private HistoricalKeaProduct MapToKeaHistory(KeaProduct p, int month, int year)
+        {
+            return new HistoricalKeaProduct
+            {
+                PeriodMonth = month,
+                PeriodYear = year,
+                ArchiveDate = DateTime.Now,
+                ExcelFileType = p.ExcelFileType,
+                ProductCode = p.ProductCode,
+                ProductName = p.ProductName,
+                Description = p.Description,
+                CashPrice = p.CashPrice,
+                WholesalePrice30 = p.WholesalePrice30,
+                WholesalePrice60 = p.WholesalePrice60,
+                WholesalePrice90 = p.WholesalePrice90,
+                WholesalePrice120 = p.WholesalePrice120,
+                PromoCashPrice = p.PromoCashPrice,
+                PromoInstall1x2 = p.PromoInstall1x2,
+                PromoInstall1x4 = p.PromoInstall1x4,
+                PromoInstall1x8 = p.PromoInstall1x8,
+                UploadedFileId = p.UploadedFileId
+            };
+        }
+
 
         // ─── Oliz Kampanya Excel İşleme ───────────────────────────────────────────────
         private void ProcessOlizExcel(AppDbContext context, int fileId, string sheetName)

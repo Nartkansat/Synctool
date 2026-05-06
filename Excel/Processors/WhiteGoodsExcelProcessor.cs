@@ -19,7 +19,10 @@ namespace ArcelikApp.Excel.Processors
         public List<WhiteGoodsProduct> Process(
             ExcelWorksheet worksheet,
             ColumnMappingProfile profile,
-            int uploadedFileId)
+            int uploadedFileId,
+            int month,
+            int year)
+
         {
             // 1. Header satırından kolon başlığı → indeks haritası oluştur
             var colIndex = BuildColumnIndex(worksheet, profile.HeaderRow);
@@ -33,6 +36,9 @@ namespace ArcelikApp.Excel.Processors
                 {
                     ExcelFileType    = profile.FileTypeName,
                     UploadedFileId   = uploadedFileId,
+                    PeriodMonth      = month,
+                    PeriodYear       = year,
+
 
                     ProductCode      = GetText(worksheet, row, colIndex, profile, nameof(WhiteGoodsProduct.ProductCode)),
                     ProductName      = GetText(worksheet, row, colIndex, profile, nameof(WhiteGoodsProduct.ProductName)),

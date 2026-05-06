@@ -3,6 +3,9 @@ namespace ArcelikApp.Models
     public class WhiteGoodsProduct
     {
         public int Id { get; set; }
+        public int PeriodMonth { get; set; }
+        public int PeriodYear { get; set; }
+
 
         // --- Ürün Kimliği ---
         public string ExcelFileType      { get; set; } = string.Empty; // "Ankastre", "Sogutucu" vb.

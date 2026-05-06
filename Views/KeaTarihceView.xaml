@@ -1,0 +1,115 @@
+<UserControl x:Class="ArcelikExcelApp.Views.KeaTarihceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             Background="#F4F6F8"
+             Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık -->
+        <Border Grid.Row="0" Background="#1C2B4A" CornerRadius="10" Padding="24,16">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="History" Width="30" Height="30" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                <StackPanel Margin="12,0,0,0">
+                    <TextBlock Text="KEA Fiyat Tarihçesi" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Arşivlenmiş geçmiş dönem küçük ev aletleri fiyatları" FontSize="12" Foreground="#A0AEC0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Filtreler -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                    <TextBlock Text="Ay" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                    <ComboBox x:Name="CmbMonth" Width="100" Style="{StaticResource MaterialDesignOutlinedComboBox}" SelectionChanged="Filter_Changed">
+                        <ComboBoxItem Content="Ocak" Tag="1"/>
+                        <ComboBoxItem Content="Şubat" Tag="2"/>
+                        <ComboBoxItem Content="Mart" Tag="3"/>
+                        <ComboBoxItem Content="Nisan" Tag="4"/>
+                        <ComboBoxItem Content="Mayıs" Tag="5"/>
+                        <ComboBoxItem Content="Haziran" Tag="6"/>
+                        <ComboBoxItem Content="Temmuz" Tag="7"/>
+                        <ComboBoxItem Content="Ağustos" Tag="8"/>
+                        <ComboBoxItem Content="Eylül" Tag="9"/>
+                        <ComboBoxItem Content="Ekim" Tag="10"/>
+                        <ComboBoxItem Content="Kasım" Tag="11"/>
+                        <ComboBoxItem Content="Aralık" Tag="12"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                    <TextBlock Text="Yıl" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                    <ComboBox x:Name="CmbYear" Width="90" Style="{StaticResource MaterialDesignOutlinedComboBox}" SelectionChanged="Filter_Changed"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                    <TextBlock Text="Kategori" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                    <ComboBox x:Name="CmbCategory" Width="150" Style="{StaticResource MaterialDesignOutlinedComboBox}" SelectionChanged="Filter_Changed"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" VerticalAlignment="Bottom" Margin="0,0,0,2">
+                    <TextBox x:Name="TxtSearch" Width="250" HorizontalAlignment="Left"
+                             materialDesign:HintAssist.Hint="Ürün Kodu/Adı Ara"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             TextChanged="TxtSearch_TextChanged"/>
+                </StackPanel>
+
+                <TextBlock Grid.Column="4" x:Name="TxtTotalCount" Text="0 Ürün" 
+                           VerticalAlignment="Center" Foreground="#64748B" FontWeight="SemiBold"/>
+            </Grid>
+        </Border>
+
+        <!-- DataGrid -->
+        <materialDesign:Card Grid.Row="2" Margin="16,16,16,8" UniformCornerRadius="10">
+            <DataGrid x:Name="GridHistory" 
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      Background="White"
+                      BorderThickness="0"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#F1F5F9">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Dönem" Binding="{Binding PeriodDisplay}" Width="100"/>
+                    <DataGridTextColumn Header="Ürün Kodu" Binding="{Binding ProductCode}" Width="130"/>
+                    <DataGridTextColumn Header="Ürün Adı" Binding="{Binding ProductName}" Width="*"/>
+                    <DataGridTextColumn Header="Peşin" Binding="{Binding CashPrice, StringFormat={}{0:N2} ₺}" Width="110"/>
+                    <DataGridTextColumn Header="30 Gün" Binding="{Binding WholesalePrice30, StringFormat={}{0:N2} ₺}" Width="110"/>
+                    <DataGridTextColumn Header="60 Gün" Binding="{Binding WholesalePrice60, StringFormat={}{0:N2} ₺}" Width="110"/>
+                    <DataGridTextColumn Header="90 Gün" Binding="{Binding WholesalePrice90, StringFormat={}{0:N2} ₺}" Width="110"/>
+                    <DataGridTextColumn Header="120 Gün" Binding="{Binding WholesalePrice120, StringFormat={}{0:N2} ₺}" Width="110"/>
+                    <DataGridTextColumn Header="Arşiv Tarihi" Binding="{Binding ArchiveDate, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="140"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </materialDesign:Card>
+
+        <!-- Pagination -->
+        <Border Grid.Row="3" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="BtnPrev" Content="Önceki" Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnPrev_Click"/>
+                <TextBlock x:Name="TxtPageInfo" Text="Sayfa 1 / 1" VerticalAlignment="Center" Margin="16,0" FontWeight="SemiBold"/>
+                <Button x:Name="BtnNext" Content="Sonraki" Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnNext_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Loading -->
+        <Grid x:Name="OverlayLoading" Grid.RowSpan="4" Background="#AAFFFFFF" Visibility="Collapsed">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" IsIndeterminate="True" Foreground="#E02020" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+    </Grid>
+</UserControl>

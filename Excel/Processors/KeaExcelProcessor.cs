@@ -15,7 +15,9 @@ namespace ArcelikApp.Excel.Processors
         public List<KeaProduct> Process(
             ExcelWorksheet worksheet,
             ColumnMappingProfile profile,
-            int uploadedFileId)
+            int uploadedFileId,
+            int month,
+            int year)
         {
             var results = new List<KeaProduct>();
             int rowCount = worksheet.Dimension?.Rows ?? 0;
@@ -26,6 +28,8 @@ namespace ArcelikApp.Excel.Processors
                 {
                     ExcelFileType  = profile.FileTypeName,
                     UploadedFileId = uploadedFileId,
+                    PeriodMonth    = month,
+                    PeriodYear     = year,
 
                     ProductCode    = GetText(worksheet, row, profile, nameof(KeaProduct.ProductCode)),
                     ProductName    = GetText(worksheet, row, profile, nameof(KeaProduct.ProductName)),

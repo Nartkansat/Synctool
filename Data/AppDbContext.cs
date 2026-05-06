@@ -11,7 +11,14 @@ namespace ArcelikApp.Data
         public DbSet<UploadedFile> UploadedFiles { get; set; }
         public DbSet<KeaProduct> KeaProducts { get; set; }
         public DbSet<WhiteGoodsProduct> WhiteGoodsProducts { get; set; }
+        public DbSet<HistoricalWhiteGoodsProduct> HistoricalWhiteGoodsProducts { get; set; }
+        public DbSet<HistoricalKeaProduct> HistoricalKeaProducts { get; set; }
+
+
         public DbSet<OlizCampaign> OlizCampaigns { get; set; }
+        public DbSet<ManualCampaign> ManualCampaigns { get; set; }
+        public DbSet<ManualCampaignProduct> ManualCampaignProducts { get; set; }
+
         public DbSet<CostCalculation> CostCalculations { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Notification> Notifications { get; set; }
@@ -86,6 +93,7 @@ namespace ArcelikApp.Data
             {
                 // Anabilgisayar ip adresi, db ye oradan baglaniliyor.
                 var connectionString = "Server=192.168.1.198;Port=3306;Database=ArcelikExcelDb;User=arcelik;Password=ArcelikWifi01;Pooling=true;MinimumPoolSize=2;MaximumPoolSize=10;ConnectionTimeout=15;DefaultCommandTimeout=15;";
+                //var connectionString = "Server=localhost;Port=3306;Database=ArcelikExcelDb;User=root;Password=os-Q^-)28FUhAt;Pooling=true;MinimumPoolSize=2;MaximumPoolSize=10;ConnectionTimeout=15;DefaultCommandTimeout=15;";
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             }
         }

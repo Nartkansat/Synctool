@@ -12,6 +12,7 @@
     <AssemblyName>synctool</AssemblyName>
     <Product>synctool</Product>
     <Title>synctool</Title>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
