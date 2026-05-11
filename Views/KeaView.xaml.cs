@@ -22,6 +22,12 @@ namespace ArcelikExcelApp.Views
         private static DateTime _cacheTime = DateTime.MinValue;
         private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(10);
 
+        public static void ClearCache()
+        {
+            _cache.Clear();
+            _cacheTime = DateTime.MinValue;
+        }
+
         private List<CalculationDisplayItem> _filteredData = new();
         private string _currentSearchQuery = string.Empty;
         private int _currentPage = 1;
@@ -204,32 +210,11 @@ namespace ArcelikExcelApp.Views
                         var window = Window.GetWindow(this) as MainWindow;
                         if (window != null)
                         {
-                            var viewer = new ExcelViewer();
-                            window.MainContentControl.Content = viewer;
-                            window.TxtPageTitle.Text = "Excel Görüntüleyici";
-                            
-                            // Menüdeki aktif butonu güncelle
-                            if (window.MenuStackPanel != null)
+                            window.NavigateToPage("ExcelViewer");
+                            if (window.MainContentControl.Content is ExcelViewer viewer)
                             {
-                                foreach (var child in window.MenuStackPanel.Children)
-                                {
-                                    if (child is Button menuBtn)
-                                    {
-                                        if (menuBtn.Tag as string == "ExcelViewer")
-                                        {
-                                            menuBtn.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#E02020"));
-                                            menuBtn.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White);
-                                        }
-                                        else
-                                        {
-                                            menuBtn.ClearValue(Button.BackgroundProperty);
-                                            menuBtn.ClearValue(Button.ForegroundProperty);
-                                        }
-                                    }
-                                }
+                                viewer.LoadSpecificFile(fileId.Value);
                             }
-                            
-                            viewer.LoadSpecificFile(fileId.Value);
                         }
                     }
                     else

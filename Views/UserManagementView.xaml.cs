@@ -140,7 +140,10 @@ namespace ArcelikExcelApp.Views
             TxtDialogTitle.Text = "Yeni Kullanıcı";
             TxtNewUsername.Text = "";
             TxtNewPassword.Password = "";
-            TxtNewLicenseKey.Text = Guid.NewGuid().ToString("N").Substring(0, 12).ToUpper();
+            using (var db = new AppDbContext())
+            {
+                TxtNewLicenseKey.Text = AuthService.GenerateUniqueLicenseKey(db);
+            }
             TxtUserError.Visibility = Visibility.Collapsed;
             DialogOverlay.Visibility = Visibility.Visible;
         }
@@ -196,7 +199,7 @@ namespace ArcelikExcelApp.Views
                             Username = username,
                             PasswordHash = SecurityHelper.HashPassword(password),
                             Role = role,
-                            LicenseKey = license,
+                            LicenseKey = string.IsNullOrEmpty(license) ? AuthService.GenerateUniqueLicenseKey(db) : license,
                             IsActive = true
                         };
                         db.Users.Add(newUser);
@@ -304,6 +307,35 @@ namespace ArcelikExcelApp.Views
                     {
                         _ = ModernDialogService.ShowAsync("Hata", $"Hata: {ex.Message}", ModernDialogType.Error);
                     }
+                }
+            }
+        }
+
+        private async void BtnUnlockUser_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is User user)
+            {
+                try
+                {
+                    int userId = user.Id;
+                    string userName = user.Username;
+                    await Task.Run(() =>
+                    {
+                        using var db = new AppDbContext();
+                        var dbUser = db.Users.Find(userId);
+                        if (dbUser != null)
+                        {
+                            dbUser.IsLocked = false;
+                            dbUser.FailedLoginAttempts = 0;
+                            db.SaveChanges();
+                        }
+                    });
+                    _ = ModernDialogService.ShowAsync("Başarılı", $"{userName} kullanıcısının hesabı tekrar aktif edildi.", ModernDialogType.Success);
+                    await LoadUsersAsync();
+                }
+                catch (Exception ex)
+                {
+                    _ = ModernDialogService.ShowAsync("Hata", $"Hata: {ex.Message}", ModernDialogType.Error);
                 }
             }
         }

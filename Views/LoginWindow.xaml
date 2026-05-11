@@ -198,6 +198,28 @@
                                         <materialDesign:PackIcon x:Name="IconShowResetPassword" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
                                     </Button>
                                 </Grid>
+
+                                <Grid Margin="0,0,0,10" Height="60">
+                                    <PasswordBox x:Name="TxtResetNewPasswordConfirm" 
+                                                 Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                                 materialDesign:HintAssist.Hint="Yeni Şifre (Tekrar)"
+                                                 Padding="16,0,45,0"
+                                                 VerticalContentAlignment="Center"
+                                                 Height="60"/>
+                                    <TextBox x:Name="TxtResetNewPasswordConfirmVisible" 
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             materialDesign:HintAssist.Hint="Yeni Şifre (Tekrar)"
+                                             Visibility="Collapsed"
+                                             Padding="16,0,45,0"
+                                             VerticalContentAlignment="Center"
+                                             Height="60"/>
+                                    <Button x:Name="BtnShowResetPasswordConfirm"
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Focusable="False" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                                            Width="30" Height="30" Click="BtnShowResetPasswordConfirm_Click">
+                                        <materialDesign:PackIcon x:Name="IconShowResetPasswordConfirm" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
+                                    </Button>
+                                </Grid>
                                 
                                 <TextBlock x:Name="TxtResetError" Foreground="#D32F2F" FontSize="12" Margin="0,5,0,15" HorizontalAlignment="Center" Visibility="Collapsed" TextWrapping="Wrap" TextAlignment="Center"/>
 

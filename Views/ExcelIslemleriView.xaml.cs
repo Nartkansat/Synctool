@@ -94,6 +94,10 @@ namespace ArcelikExcelApp.Views
             bool showTypePanel = (category == "Beyaz Eşya" || category == "Kea");
             CmbWhiteGoodsType.Visibility = showTypePanel ? Visibility.Visible : Visibility.Collapsed;
 
+            // Oliz Kampanya seçilirse Merge checkbox'ını ve Manuel Ekle butonunu göster
+            ChkMergeOliz.Visibility = (category == "Oliz Kampanya") ? Visibility.Visible : Visibility.Collapsed;
+            BtnManualOliz.Visibility = (category == "Oliz Kampanya") ? Visibility.Visible : Visibility.Collapsed;
+
 
             if (showTypePanel)
             {
@@ -189,6 +193,7 @@ namespace ArcelikExcelApp.Views
             
             int selectedYear = (int)CmbPeriodYear.SelectedItem;
             bool isHistoryMode = ChkIsHistory.IsChecked ?? false;
+            bool mergeOliz = ChkMergeOliz.IsChecked ?? false;
 
             // Uzantı kontrolü (.xlsx)
 
@@ -300,7 +305,7 @@ namespace ArcelikExcelApp.Views
                         _selectedFilePath = absoluteStoragePath;
 
                         if (categoryName == "Oliz Kampanya")
-                            ProcessOlizExcel(context, fileId, worksheetName);
+                            ProcessOlizExcel(context, fileId, worksheetName, mergeOliz);
                         else if (categoryName == "Beyaz Eşya")
                             importedCount = ProcessWhiteGoodsExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: false);
                         else if (categoryName == "Kea")
@@ -311,11 +316,11 @@ namespace ArcelikExcelApp.Views
                 });
 
                 if (categoryName == "Beyaz Eşya" || categoryName == "Kea")
-                    await ModernDialogService.ShowAsync("Başarılı", $"✅ {whiteGoodsType}: {importedCount} ürün başarıyla kaydedildi.", ModernDialogType.Success);
+                    await ModernDialogService.ShowAsync("Başarılı", $"✅ {whiteGoodsType}: {importedCount} ürün başarıyla kaydedildi.\n\nLütfen değişikliklerin yansıması için Maliyet Hesaplama ekranından listeyi yeniden hesaplatıp kaydedin.", ModernDialogType.Success);
                 else if (categoryName == "Oliz Kampanya")
-                    await ModernDialogService.ShowAsync("Başarılı", "✅ Oliz Kampanya verileri başarıyla yüklendi.", ModernDialogType.Success);
+                    await ModernDialogService.ShowAsync("Başarılı", "✅ Oliz Kampanya verileri başarıyla yüklendi.\n\nLütfen değişikliklerin yansıması için Maliyet Hesaplama ekranından listeyi yeniden hesaplatıp kaydedin.", ModernDialogType.Success);
                 else if (categoryName == "Oliz Paket Kampanya")
-                    await ModernDialogService.ShowAsync("Başarılı", $"✅ {importedCount} paket kampanya başarıyla yüklendi.", ModernDialogType.Success);
+                    await ModernDialogService.ShowAsync("Başarılı", $"✅ {importedCount} paket kampanya başarıyla yüklendi.\n\nLütfen değişikliklerin yansıması için Maliyet Hesaplama ekranından listeyi yeniden hesaplatıp kaydedin.", ModernDialogType.Success);
                 else
                     MainSnackbar.MessageQueue?.Enqueue($"{categoryName} dosyası yüklendi.");
             }
@@ -573,8 +578,48 @@ namespace ArcelikExcelApp.Views
 
 
         // ─── Oliz Kampanya Excel İşleme ───────────────────────────────────────────────
-        private void ProcessOlizExcel(AppDbContext context, int fileId, string sheetName)
+        private void ProcessOlizExcel(AppDbContext context, int fileId, string sheetName, bool mergeWithPrevious)
         {
+            var mergedCampaigns = new Dictionary<string, OlizCampaign>();
+
+            if (mergeWithPrevious)
+            {
+                // Önceki en güncel Oliz dosyasını bul (kendisi hariç)
+                var previousFile = context.UploadedFiles
+                    .Where(f => f.Category == "Oliz Kampanya" && f.Id < fileId)
+                    .OrderByDescending(f => f.Id)
+                    .FirstOrDefault();
+
+                if (previousFile != null)
+                {
+                    var oldCampaigns = context.OlizCampaigns.Where(c => c.UploadedFileId == previousFile.Id).ToList();
+                    foreach (var c in oldCampaigns)
+                    {
+                        var copy = new OlizCampaign
+                        {
+                            Brand = c.Brand,
+                            ProductGroup = c.ProductGroup,
+                            ProductCode = c.ProductCode,
+                            ProductDescription = c.ProductDescription,
+                            DiscountAmount = c.DiscountAmount,
+                            DiscountNetAmount = c.DiscountNetAmount,
+                            CampaignStartDate = c.CampaignStartDate,
+                            CampaignEndDate = c.CampaignEndDate,
+                            LastTransportDate = c.LastTransportDate,
+                            LastBarcodeScanDate = c.LastBarcodeScanDate,
+                            CampaignCode = c.CampaignCode,
+                            CampaignShortDescription = c.CampaignShortDescription,
+                            GeneralDescription = c.GeneralDescription,
+                            UploadedFileId = fileId // Yeni dosya ID'sine bağlıyoruz
+                        };
+
+                        string key = c.ProductCode?.Trim().ToUpperInvariant() ?? string.Empty;
+                        if (!string.IsNullOrEmpty(key))
+                            mergedCampaigns[key] = copy;
+                    }
+                }
+            }
+
             using var package = new ExcelPackage(new FileInfo(_selectedFilePath));
             var worksheet     = package.Workbook.Worksheets[sheetName];
             if (worksheet == null) return;
@@ -604,10 +649,111 @@ namespace ArcelikExcelApp.Views
                 if (string.IsNullOrWhiteSpace(campaign.ProductCode) &&
                     string.IsNullOrWhiteSpace(campaign.CampaignCode)) continue;
 
-                context.OlizCampaigns.Add(campaign);
+                string key = campaign.ProductCode?.Trim().ToUpperInvariant() ?? string.Empty;
+                if (!string.IsNullOrEmpty(key))
+                {
+                    // Dictionary'de varsa üzerine yazar (günceller), yoksa yeni ekler
+                    mergedCampaigns[key] = campaign;
+                }
+                else
+                {
+                    // Ürün kodu yok ama kampanya kodu var (nadiren olabilir)
+                    // Benzersiz bir key uydurup dictionary'ye atalım ki eklensin
+                    mergedCampaigns[Guid.NewGuid().ToString()] = campaign;
+                }
             }
+
+            context.OlizCampaigns.AddRange(mergedCampaigns.Values);
             context.SaveChanges();
         }
+
+        // ─── Manuel Oliz Kampanyası Ekleme ─────────────────────────────────────────
+        private void BtnOpenManualOliz_Click(object sender, RoutedEventArgs e)
+        {
+            TxtManualOlizCode.Text = "";
+            TxtManualOlizDiscount.Text = "";
+            ManualOlizOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void BtnCancelManualOliz_Click(object sender, RoutedEventArgs e)
+        {
+            ManualOlizOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private async void BtnSaveManualOliz_Click(object sender, RoutedEventArgs e)
+        {
+            string code = TxtManualOlizCode.Text.Trim();
+            string discountStr = TxtManualOlizDiscount.Text.Trim();
+
+            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(discountStr))
+            {
+                MainSnackbar.MessageQueue?.Enqueue("Lütfen ürün kodu ve indirim tutarını girin.");
+                return;
+            }
+
+            if (!decimal.TryParse(discountStr.Replace(".", ","), out decimal discount))
+            {
+                MainSnackbar.MessageQueue?.Enqueue("Geçersiz indirim tutarı formatı.");
+                return;
+            }
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    using var context = new AppDbContext();
+                    var lastFile = context.UploadedFiles
+                        .Where(f => f.Category == "Oliz Kampanya")
+                        .OrderByDescending(f => f.Id)
+                        .FirstOrDefault();
+
+                    if (lastFile == null)
+                    {
+                        throw new InvalidOperationException("Sistemde önceden yüklenmiş bir Oliz Kampanya dosyası bulunamadı. Lütfen önce bir Oliz Excel'i yükleyin.");
+                    }
+
+                    var existing = context.OlizCampaigns.FirstOrDefault(c => c.UploadedFileId == lastFile.Id && c.ProductCode == code);
+                    if (existing != null)
+                    {
+                        existing.DiscountNetAmount = discount;
+                        existing.CampaignShortDescription = "Manuel Güncellendi";
+                    }
+                    else
+                    {
+                        context.OlizCampaigns.Add(new OlizCampaign
+                        {
+                            ProductCode = code,
+                            DiscountNetAmount = discount,
+                            DiscountAmount = discount,
+                            UploadedFileId = lastFile.Id,
+                            CampaignShortDescription = "Manuel Eklendi",
+                            Brand = "",
+                            ProductGroup = "",
+                            ProductDescription = "Manuel Eklenen Kampanya",
+                            CampaignStartDate = DateTime.Now.ToString("dd.MM.yyyy"),
+                            CampaignEndDate = "31.12.2099",
+                            LastTransportDate = "",
+                            LastBarcodeScanDate = "",
+                            CampaignCode = "MANUAL",
+                            GeneralDescription = ""
+                        });
+                    }
+                    context.SaveChanges();
+                });
+
+                ManualOlizOverlay.Visibility = Visibility.Collapsed;
+                await ModernDialogService.ShowAsync("Başarılı", $"{code} kodlu ürün için {discount} ₺ indirim başarıyla en son Oliz listesine eklendi/güncellendi.\nMaliyet Hesaplama ekranından tekrar hesaplatıp kaydedebilirsiniz.", ModernDialogType.Success);
+            }
+            catch (InvalidOperationException ex)
+            {
+                await ModernDialogService.ShowAsync("Uyarı", ex.Message, ModernDialogType.Warning);
+            }
+            catch (Exception ex)
+            {
+                await ModernDialogService.ShowAsync("Hata", $"Kayıt sırasında hata oluştu:\n{ex.Message}", ModernDialogType.Error);
+            }
+        }
+
 
         // ─── Yardımcı Parser'lar (Oliz için) ──────────────────────────────────────────
         private decimal ParseDecimalFromCell(ExcelRange cell)

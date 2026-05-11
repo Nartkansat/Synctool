@@ -81,12 +81,12 @@ namespace ArcelikExcelApp
             // Buton işaretliyse (Açık Menü)
             if (MenuToggleButton.IsChecked == true)
             {
-                SidebarColumn.Width = new GridLength(280);
+                SidebarColumn.Width = new GridLength(220);
             }
             // Buton işaretsizse (Kapalı/Dar Menü)
             else
             {
-                SidebarColumn.Width = new GridLength(85);
+                SidebarColumn.Width = new GridLength(62);
             }
         }
 
@@ -210,6 +210,18 @@ namespace ArcelikExcelApp
 
                 BadgeNotifications.Badge = result.unreadCount > 0 ? (object)result.unreadCount : null;
                 ItemsNotifications.ItemsSource = result.list.Take(5);
+
+                // Sidebar notification badge güncelle
+                if (result.unreadCount > 0)
+                {
+                    var countStr = result.unreadCount > 99 ? "99+" : result.unreadCount.ToString();
+                    TxtSidebarNotifBadgeExpanded.Text = countStr;
+                    SidebarNotifBadgeExpanded.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    SidebarNotifBadgeExpanded.Visibility = Visibility.Collapsed;
+                }
             }
             catch { /* Ağ hatası olursa UI'ı çökertme */ }
         }
@@ -280,6 +292,8 @@ namespace ArcelikExcelApp
                 {
                     menuBtn.ClearValue(Button.BackgroundProperty);
                     menuBtn.ClearValue(Button.ForegroundProperty);
+                    menuBtn.ClearValue(Button.BorderBrushProperty);
+                    menuBtn.ClearValue(UIElement.EffectProperty);
                 }
                 else if (child is Panel panel)
                 {
@@ -318,7 +332,8 @@ namespace ArcelikExcelApp
                     ResetNavButtons(MenuStackPanel);
                 }
 
-                btn.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
+                btn.Background = new SolidColorBrush(Color.FromRgb(0x14, 0x15, 0x20));
+                btn.BorderBrush = new SolidColorBrush(Color.FromRgb(0xE0, 0x20, 0x20));
                 btn.Foreground = Brushes.White;
                 PerformNavigation(tag);
             }
@@ -330,7 +345,8 @@ namespace ArcelikExcelApp
             if (targetBtn != null)
             {
                 ResetNavButtons(MenuStackPanel);
-                targetBtn.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
+                targetBtn.Background = new SolidColorBrush(Color.FromRgb(0x14, 0x15, 0x20));
+                targetBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(0xE0, 0x20, 0x20));
                 targetBtn.Foreground = Brushes.White;
                 PerformNavigation(tag, parameter);
             }
@@ -421,6 +437,10 @@ namespace ArcelikExcelApp
                     case "Settings":
                         TxtPageTitle.Text = "Ayarlar";
                         MainContentControl.Content = new SettingsView();
+                        break;
+                    case "Notifications":
+                        TxtPageTitle.Text = "Tüm Bildirimler";
+                        MainContentControl.Content = new NotificationsView();
                         break;
                 }
         }

@@ -26,6 +26,12 @@ namespace ArcelikExcelApp.Views
         private static DateTime _cacheTime = DateTime.MinValue;
         private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(10);
 
+        public static void ClearCache()
+        {
+            _cache.Clear();
+            _cacheTime = DateTime.MinValue;
+        }
+
         private List<CalculationDisplayItem> _filteredData = new();
         private string _currentSearchQuery = string.Empty;
         private int _currentPage = 1;

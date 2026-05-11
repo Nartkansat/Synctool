@@ -24,5 +24,9 @@ namespace ArcelikApp.Models
         // --- Beni Hatırla ---
         public string? RememberMeToken { get; set; }
         public DateTime? TokenExpiry { get; set; }
+
+        // --- Güvenlik ---
+        public int FailedLoginAttempts { get; set; } = 0;
+        public bool IsLocked { get; set; } = false;
     }
 }

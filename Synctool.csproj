@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\synctoolRedYazısız.ico</ApplicationIcon>
     <StartupObject></StartupObject>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <AssemblyName>synctool</AssemblyName>
     <Product>synctool</Product>
     <Title>synctool</Title>
@@ -31,6 +31,12 @@
     <Resource Include="Assets\synctoolAppIcon.png" />
     <Resource Include="Assets\synctoolRed.png" />
     <Resource Include="Assets\synctoolRedYazısız.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Synctool.Api\**" />
+    <EmbeddedResource Remove="Synctool.Api\**" />
+    <None Remove="Synctool.Api\**" />
   </ItemGroup>
 
   <ItemGroup>

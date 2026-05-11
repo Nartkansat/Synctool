@@ -15,11 +15,32 @@ namespace ArcelikApp.Services
             using var db = new AppDbContext();
             var user = db.Users.FirstOrDefault(u => u.Username == username);
 
-            if (user == null || !SecurityHelper.VerifyPassword(password, user.PasswordHash))
+            if (user == null)
                 return new LoginResult { Success = false, Message = "Kullanıcı adı veya şifre hatalı." };
+
+            if (user.IsLocked)
+                return new LoginResult { Success = false, Message = "Hesabınız çok sayıda hatalı giriş denemesi nedeniyle askıya alınmıştır. Lütfen yönetici ile iletişime geçin." };
 
             if (!user.IsActive)
                 return new LoginResult { Success = false, Message = "Hesabınız pasif durumdadır." };
+
+            if (!SecurityHelper.VerifyPassword(password, user.PasswordHash))
+            {
+                user.FailedLoginAttempts++;
+                if (user.FailedLoginAttempts >= 5)
+                {
+                    user.IsLocked = true;
+                    db.SaveChanges();
+                    return new LoginResult { Success = false, Message = "Hesabınız 5 kez hatalı giriş denemesi nedeniyle askıya alınmıştır." };
+                }
+                
+                db.SaveChanges();
+                return new LoginResult { Success = false, Message = $"Kullanıcı adı veya şifre hatalı. (Kalan deneme hakkı: {5 - user.FailedLoginAttempts})" };
+            }
+
+            // Başarılı giriş - denemeleri sıfırla
+            user.FailedLoginAttempts = 0;
+            user.IsLocked = false; // Güvenlik için sıfırla
 
             string currentDeviceId = SecurityHelper.GetDeviceId();
 
@@ -218,8 +239,23 @@ namespace ArcelikApp.Services
             if (user == null) return false;
 
             user.PasswordHash = SecurityHelper.HashPassword(newPassword);
+            user.FailedLoginAttempts = 0;
+            user.IsLocked = false;
             db.SaveChanges();
             return true;
+        }
+
+        public static string GenerateUniqueLicenseKey(AppDbContext db)
+        {
+            string key;
+            do
+            {
+                // Format: XXXX-XXXX-XXXX-XXXX
+                string raw = Guid.NewGuid().ToString("N").ToUpper();
+                key = $"{raw.Substring(0, 4)}-{raw.Substring(4, 4)}-{raw.Substring(8, 4)}-{raw.Substring(12, 4)}";
+            } while (db.Users.Any(u => u.LicenseKey == key));
+            
+            return key;
         }
 
         public static RegisterResult Register(string username, string dealerName, string password, int agreementId)
@@ -236,6 +272,7 @@ namespace ArcelikApp.Services
                 DealerName = dealerName,
                 PasswordHash = SecurityHelper.HashPassword(password),
                 Role = "User",
+                LicenseKey = GenerateUniqueLicenseKey(db),
                 IsActive = true,
                 IsActivated = false
             };

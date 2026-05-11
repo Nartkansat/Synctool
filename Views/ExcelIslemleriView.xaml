@@ -27,6 +27,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
 
@@ -85,6 +86,8 @@
                     </StackPanel>
                     <CheckBox x:Name="ChkIsHistory" Content="Geçmiş Fiyat Olarak Yükle" Margin="4,8,0,0"
                               Foreground="#6B7280" FontSize="11" FontWeight="Medium"/>
+                    <CheckBox x:Name="ChkMergeOliz" Content="Mevcut Kampanyalarla Birleştir" Margin="4,4,0,0"
+                              Foreground="#6B7280" FontSize="11" FontWeight="Medium" Visibility="Collapsed" IsChecked="True"/>
                 </StackPanel>
 
 
@@ -107,7 +110,13 @@
                         Width="120" Height="45" Margin="20,0,0,0"
                         Click="BtnUpload_Click" VerticalAlignment="Center" Grid.Column="5"/>
 
-
+                <Button x:Name="BtnManualOliz"
+                        Content="Manuel Ekle"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        BorderBrush="#E02020" Foreground="#E02020"
+                        Height="45" Margin="10,0,0,0"
+                        Visibility="Collapsed"
+                        Click="BtnOpenManualOliz_Click" VerticalAlignment="Center" Grid.Column="6"/>
             </Grid>
         </Border>
 
@@ -131,5 +140,21 @@
         <materialDesign:Snackbar x:Name="MainSnackbar" Grid.Row="2"
                                  HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                                  Panel.ZIndex="100" Margin="20"/>
+
+        <!-- Manuel İndirim Overlay -->
+        <Grid x:Name="ManualOlizOverlay" Visibility="Collapsed" Background="#B2000000" Grid.RowSpan="4" Panel.ZIndex="101">
+            <Border Background="White" CornerRadius="12" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                <StackPanel>
+                    <TextBlock Text="Manuel Oliz İndirimi Ekle / Güncelle" FontSize="18" FontWeight="Bold" Margin="0,0,0,16" Foreground="#1E293B"/>
+                    <TextBlock Text="Bu işlem sistemdeki en son Oliz dosyasına yeni bir indirim ekler veya mevcut olanı günceller." FontSize="12" Foreground="#64748B" Margin="0,0,0,16" TextWrapping="Wrap"/>
+                    <TextBox x:Name="TxtManualOlizCode" materialDesign:HintAssist.Hint="Ürün Kodu (Örn: 2030 mb)" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
+                    <TextBox x:Name="TxtManualOlizDiscount" materialDesign:HintAssist.Hint="Net İndirim Tutarı (Örn: 5000)" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,24"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="İptal" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0" Click="BtnCancelManualOliz_Click"/>
+                        <Button Content="Kaydet" Style="{StaticResource MaterialDesignRaisedButton}" Background="#E02020" BorderBrush="#E02020" Foreground="White" Click="BtnSaveManualOliz_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

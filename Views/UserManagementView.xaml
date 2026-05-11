@@ -142,7 +142,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     
-                    <DataGridTemplateColumn Header="Cihaz" Width="130">
+                    <DataGridTemplateColumn Header="Cihaz" Width="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,0" VerticalAlignment="Center">
@@ -157,6 +157,35 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
+                    <DataGridTemplateColumn Header="Hesap Durumu" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border x:Name="StatusBadge" Padding="8,4" CornerRadius="8" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon x:Name="StatusIcon" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="StatusText" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                        <Setter TargetName="StatusBadge" Property="Background" Value="#FEE2E2"/>
+                                        <Setter TargetName="StatusIcon" Property="Kind" Value="LockOutline"/>
+                                        <Setter TargetName="StatusIcon" Property="Foreground" Value="#DC2626"/>
+                                        <Setter TargetName="StatusText" Property="Text" Value="Askıya Alındı"/>
+                                        <Setter TargetName="StatusText" Property="Foreground" Value="#DC2626"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsLocked}" Value="False">
+                                        <Setter TargetName="StatusBadge" Property="Background" Value="#ECFDF5"/>
+                                        <Setter TargetName="StatusIcon" Property="Kind" Value="CheckCircleOutline"/>
+                                        <Setter TargetName="StatusIcon" Property="Foreground" Value="#10B981"/>
+                                        <Setter TargetName="StatusText" Property="Text" Value="Aktif"/>
+                                        <Setter TargetName="StatusText" Property="Foreground" Value="#10B981"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <DataGridTemplateColumn Header="Aksiyon" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -166,6 +195,12 @@
                                             ToolTip="Düzenle" Click="BtnEditUser_Click"
                                             Foreground="#3949AB">
                                         <materialDesign:PackIcon Kind="PencilOutline" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button x:Name="BtnUnlock" Style="{StaticResource MaterialDesignIconButton}" 
+                                            Width="36" Height="36" Margin="0,0,2,0"
+                                            ToolTip="Kilidi Kaldır" Click="BtnUnlockUser_Click"
+                                            Foreground="#4CAF50" Visibility="Collapsed">
+                                        <materialDesign:PackIcon Kind="LockOpenOutline" Width="20" Height="20"/>
                                     </Button>
                                     <Button Style="{StaticResource MaterialDesignIconButton}" 
                                             Width="36" Height="36" Margin="0,0,2,0"
@@ -180,6 +215,11 @@
                                         <materialDesign:PackIcon Kind="CellphoneLock" Width="20" Height="20"/>
                                     </Button>
                                 </StackPanel>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                        <Setter TargetName="BtnUnlock" Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -30,23 +30,26 @@ namespace ArcelikExcelApp.Views
                 // Yetki Kontrolü: Sadece Admin veri sıfırlama panelini görebilir
                 if (AuthService.CurrentUser.Role == "Admin")
                 {
-                    CardDataManagement.Visibility = Visibility.Visible;
-                    CardAgreementManagement.Visibility = Visibility.Visible;
+                    TabDataManagement.Visibility = Visibility.Visible;
+                    TabAgreementManagement.Visibility = Visibility.Visible;
+                    TabUserManagement.Visibility = Visibility.Visible;
 
                     // Mevcut sözleşmeyi yükle
                     LoadCurrentAgreement();
                 }
                 else
                 {
-                    CardDataManagement.Visibility = Visibility.Collapsed;
-                    CardAgreementManagement.Visibility = Visibility.Collapsed;
+                    TabDataManagement.Visibility = Visibility.Collapsed;
+                    TabAgreementManagement.Visibility = Visibility.Collapsed;
+                    TabUserManagement.Visibility = Visibility.Collapsed;
                 }
             }
             else
             {
                 // Kullanıcı oturumu yoksa (güvenlik için) paneli gizle
-                CardDataManagement.Visibility = Visibility.Collapsed;
-                CardAgreementManagement.Visibility = Visibility.Collapsed;
+                TabDataManagement.Visibility = Visibility.Collapsed;
+                TabAgreementManagement.Visibility = Visibility.Collapsed;
+                TabUserManagement.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -217,6 +220,12 @@ namespace ArcelikExcelApp.Views
             if (ChkOlizCampaigns.IsChecked == true) tablesToReset.Add("OlizCampaigns");
             if (ChkKeaProducts.IsChecked == true) tablesToReset.Add("KeaProducts");
             if (ChkWhiteGoodsProducts.IsChecked == true) tablesToReset.Add("WhiteGoodsProducts");
+            
+            if (ChkHistoricalKea.IsChecked == true) tablesToReset.Add("HistoricalKeaProducts");
+            if (ChkHistoricalWhiteGoods.IsChecked == true) tablesToReset.Add("HistoricalWhiteGoodsProducts");
+            if (ChkManualCampaigns.IsChecked == true) tablesToReset.Add("ManualCampaigns");
+            if (ChkManualCampaignProducts.IsChecked == true) tablesToReset.Add("ManualCampaignProducts");
+            if (ChkUploadedFiles.IsChecked == true) tablesToReset.Add("UploadedFiles");
 
             if (tablesToReset.Count == 0)
             {
@@ -273,6 +282,9 @@ namespace ArcelikExcelApp.Views
             {
                 using (var db = new AppDbContext())
                 {
+                    // MySQL'de foreign key kısıtlamalarına takılmamak için geçici olarak devre dışı bırakıyoruz
+                    await db.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 0;");
+
                     foreach (var tableName in _tablesPendingReset)
                     {
                         // Güvenlik: Sadece izin verilen tablo isimlerini çalıştır
@@ -282,6 +294,11 @@ namespace ArcelikExcelApp.Views
                             "OlizCampaigns"       => "TRUNCATE TABLE OlizCampaigns",
                             "KeaProducts"         => "TRUNCATE TABLE KeaProducts",
                             "WhiteGoodsProducts"  => "TRUNCATE TABLE WhiteGoodsProducts",
+                            "HistoricalKeaProducts" => "TRUNCATE TABLE HistoricalKeaProducts",
+                            "HistoricalWhiteGoodsProducts" => "TRUNCATE TABLE HistoricalWhiteGoodsProducts",
+                            "ManualCampaigns" => "TRUNCATE TABLE ManualCampaigns",
+                            "ManualCampaignProducts" => "TRUNCATE TABLE ManualCampaignProducts",
+                            "UploadedFiles" => "TRUNCATE TABLE UploadedFiles",
                             _ => null
                         };
 
@@ -290,6 +307,9 @@ namespace ArcelikExcelApp.Views
                             await db.Database.ExecuteSqlRawAsync(sql);
                         }
                     }
+
+                    // İşlem bitince tekrar aktif ediyoruz
+                    await db.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1;");
                 }
                 ShowToast("Seçili tablolar başarıyla sıfırlandı.");
                 SetAllCheckboxes(false);

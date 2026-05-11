@@ -225,10 +225,23 @@ namespace ArcelikExcelApp.Views
             string username = TxtResetUsername.Text.Trim();
             string license = TxtResetLicense.Text.Trim();
             string newPass = TxtResetNewPasswordVisible.IsVisible ? TxtResetNewPasswordVisible.Text : TxtResetNewPassword.Password;
+            string newPassConfirm = TxtResetNewPasswordConfirmVisible.IsVisible ? TxtResetNewPasswordConfirmVisible.Text : TxtResetNewPasswordConfirm.Password;
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(license) || string.IsNullOrEmpty(newPass))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(license) || string.IsNullOrEmpty(newPass) || string.IsNullOrEmpty(newPassConfirm))
             {
                 ShowResetError("Lütfen tüm alanları doldurun.");
+                return;
+            }
+
+            if (newPass != newPassConfirm)
+            {
+                ShowResetError("Şifreler uyuşmuyor.");
+                return;
+            }
+
+            if (newPass.Length < 6)
+            {
+                ShowResetError("Şifre en az 6 karakter olmalıdır.");
                 return;
             }
 
@@ -504,6 +517,29 @@ namespace ArcelikExcelApp.Views
                 IconShowResetPassword.Kind = MaterialDesignThemes.Wpf.PackIconKind.EyeOffOutline;
                 IconShowResetPassword.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8"));
                 TxtResetNewPassword.Focus();
+            }
+        }
+
+        private void BtnShowResetPasswordConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            if (TxtResetNewPasswordConfirm.Visibility == Visibility.Visible)
+            {
+                TxtResetNewPasswordConfirmVisible.Text = TxtResetNewPasswordConfirm.Password;
+                TxtResetNewPasswordConfirm.Visibility = Visibility.Collapsed;
+                TxtResetNewPasswordConfirmVisible.Visibility = Visibility.Visible;
+                IconShowResetPasswordConfirm.Kind = MaterialDesignThemes.Wpf.PackIconKind.EyeOutline;
+                IconShowResetPasswordConfirm.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
+                TxtResetNewPasswordConfirmVisible.Focus();
+                TxtResetNewPasswordConfirmVisible.CaretIndex = TxtResetNewPasswordConfirmVisible.Text.Length;
+            }
+            else
+            {
+                TxtResetNewPasswordConfirm.Password = TxtResetNewPasswordConfirmVisible.Text;
+                TxtResetNewPasswordConfirmVisible.Visibility = Visibility.Collapsed;
+                TxtResetNewPasswordConfirm.Visibility = Visibility.Visible;
+                IconShowResetPasswordConfirm.Kind = MaterialDesignThemes.Wpf.PackIconKind.EyeOffOutline;
+                IconShowResetPasswordConfirm.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8"));
+                TxtResetNewPasswordConfirm.Focus();
             }
         }
 

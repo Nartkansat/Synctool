@@ -410,6 +410,10 @@ namespace ArcelikExcelApp.Views
                 db.CostCalculations.AddRange(entities);
                 db.SaveChanges();
 
+                // Fiyatlar güncellendiği için sayfaların önbelleğini sıfırla (Kapatıp açmaya gerek kalmaması için)
+                BeyazEsyaView.ClearCache();
+                KeaView.ClearCache();
+
                 SetStatus($"✔ {entities.Count} kayıt veritabanına eklendi.");
                 _ = ModernDialogService.ShowAsync("Başarılı", $"{entities.Count} kayıt başarıyla kaydedildi!", ModernDialogType.Success);
             }
