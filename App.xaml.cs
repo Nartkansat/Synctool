@@ -19,33 +19,24 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+
+
         base.OnStartup(e);
 
-        // 1. Güncelleme kontrolünü BEKLE — sonuç gelmeden hiçbir pencere açılmasın
-        bool updateAvailable = false;
-        try
+        // Güncelleme kontrolü (arka planda)
+        _ = Task.Run(() =>
         {
-            var updateTask = UpdateService.CheckForUpdatesAsync();
-            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(15)); // Yavaş ağ için güvenlik süresi
-            var winner = await Task.WhenAny(updateTask, timeoutTask);
-            if (winner == updateTask)
-                updateAvailable = updateTask.Result;
-        }
-        catch { }
+            try { UpdateService.CheckForUpdates(); } catch { }
+        });
 
-        // Güncelleme varsa: AutoUpdater zaten Forced dialog'unu gösteriyor.
-        // Hiçbir uygulama penceresi açılmamalı; dialog kapanınca Mode.Forced uygulamayı kapatır.
-        if (updateAvailable)
-            return;
-
-        // 2. WAMP kontrolünü arka planda başlat (UI'ı bloke etme)
+        // WAMP kontrolünü arka planda başlat (UI'ı bloke etme)
         _ = Task.Run(() => EnsureWampRunningAsync());
 
-        // 3. Auto-login kontrolünü arka planda yap
+        // Auto-login kontrolünü arka planda yap
         bool autoLoginSuccess = false;
         try
         {
-            autoLoginSuccess = await ArcelikApp.Services.AuthService.CheckAutoLoginAsync();
+            autoLoginSuccess = await Task.Run(() => ArcelikApp.Services.AuthService.CheckAutoLogin());
         }
         catch { }
 
