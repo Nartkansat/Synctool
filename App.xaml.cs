@@ -36,7 +36,7 @@ public partial class App : Application
         bool autoLoginSuccess = false;
         try
         {
-            autoLoginSuccess = await Task.Run(() => ArcelikApp.Services.AuthService.CheckAutoLogin());
+            autoLoginSuccess = await ArcelikApp.Services.AuthService.CheckAutoLoginAsync();
         }
         catch { }
 
