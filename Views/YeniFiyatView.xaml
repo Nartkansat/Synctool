@@ -7,24 +7,12 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Başlık -->
-        <Border Grid.Row="0" Background="#1C2B4A" CornerRadius="10" Padding="24,16">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="CalculatorVariant" Width="30" Height="30" Foreground="#FF6B6B" VerticalAlignment="Center"/>
-                <StackPanel Margin="12,0,0,0">
-                    <TextBlock Text="Maliyet Hesaplama" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="KEA ve Beyaz Eşya ürünleri için kampanya bazlı maliyet hesabı" FontSize="12" Foreground="#A0AEC0"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
         <!-- Ayarlar Paneli -->
-        <Border Grid.Row="1" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,16">
+        <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,16">
             <WrapPanel Orientation="Horizontal">
 
                 <!-- PricePP Kaynağı -->
@@ -69,7 +57,7 @@
                 <StackPanel Margin="0,0,24,8" VerticalAlignment="Bottom">
                     <TextBlock Text="Ürün Dosyaları" FontSize="11" FontWeight="SemiBold" Foreground="#64748B" Margin="0,0,0,4"/>
                     <Button x:Name="BtnSelectFiles" Style="{StaticResource MaterialDesignOutlinedButton}" 
-                            Width="240" HorizontalContentAlignment="Stretch" Padding="10,0"
+                            Width="240" HorizontalContentAlignment="Stretch" Padding="10,0" Height="50" 
                             BorderBrush="#E2E8F0" Foreground="#1A1A24" Click="BtnSelectFiles_Click">
                         <Grid>
                             <TextBlock x:Name="TxtSelectedFilesCount" Text="Tüm Dosyalar" VerticalAlignment="Center"/>
@@ -81,8 +69,8 @@
                            Placement="Bottom" PlacementTarget="{Binding ElementName=BtnSelectFiles}"
                            PopupAnimation="Fade">
                         <materialDesign:Card Width="320" MaxHeight="450" UniformCornerRadius="12" Background="White" 
-                                           materialDesign:ElevationAssist.Elevation="Dp12" Margin="5">
-                            <Border Padding="15">
+                                           materialDesign:ElevationAssist.Elevation="Dp12" Margin="5" >
+                            <Border Padding="5">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -187,7 +175,7 @@
         </Border>
 
         <!-- Sonuç Tablosu -->
-        <materialDesign:Card Grid.Row="2" Margin="16,16,16,8" UniformCornerRadius="10">
+        <materialDesign:Card Grid.Row="1" Margin="16,16,16,8" UniformCornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -258,7 +246,7 @@
         </materialDesign:Card>
 
         <!-- Status Bar -->
-        <Border Grid.Row="3" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,6">
+        <Border Grid.Row="2" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,6">
             <TextBlock x:Name="TxtStatus" Text="Hazır — Hesaplamak için yukarıdaki ayarları yapıp 'Hesapla' butonuna tıklayın."
                        FontSize="11" Foreground="#94A3B8"/>
         </Border>

@@ -10,6 +10,7 @@ using ArcelikApp.Services;
 using ArcelikExcelApp.Services;
 using ArcelikExcelApp.Models;
 using System.Collections.ObjectModel;
+using MaterialDesignThemes.Wpf;
 
 namespace ArcelikExcelApp
 {
@@ -278,7 +279,7 @@ namespace ArcelikExcelApp
         private void BtnViewAllNotifications_Click(object sender, RoutedEventArgs e)
         {
             PopupNotifications.IsOpen = false;
-            TxtPageTitle.Text = "Tüm Bildirimler";
+            SetPageHeader("Tüm Bildirimler", "Sistem bildirimleri ve duyurular", PackIconKind.BellRing, "#F59E0B", "#FFFBEB");
             MainContentControl.Content = new NotificationsView();
         }
         #endregion
@@ -366,24 +367,33 @@ namespace ArcelikExcelApp
             return null;
         }
 
+        private void SetPageHeader(string title, string subtitle, PackIconKind iconKind, string iconColor, string iconBg)
+        {
+            TxtPageTitle.Text = title;
+            TxtPageSubtitle.Text = subtitle;
+            IconPageTitle.Kind = iconKind;
+            IconPageTitle.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(iconColor));
+            BorderPageIcon.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(iconBg));
+        }
+
         private void PerformNavigation(string tag, object parameter = null)
         {
             switch (tag)
                 {
                     case "Anasayfa":
-                        TxtPageTitle.Text = "Dashboard";
+                        SetPageHeader("Dashboard", "Genel istatistikler ve sistem özeti", PackIconKind.ViewDashboard, "#4F46E5", "#EEF2FF");
                         MainContentControl.Content = new DashboardView();
                         break;
                     case "Kea":
-                        TxtPageTitle.Text = "Küçük Ev Aletleri";
+                        SetPageHeader("Küçük Ev Aletleri", "KEA maliyet listesi ve fiyat analizleri", PackIconKind.Blender, "#E02020", "#FFF1F2");
                         MainContentControl.Content = new KeaView();
                         break;
                     case "BeyazEsya":
-                        TxtPageTitle.Text = "Beyaz Eşya";
+                        SetPageHeader("Beyaz Eşya", "Beyaz eşya maliyet listesi ve fiyat analizleri", PackIconKind.WashingMachine, "#3B82F6", "#EFF6FF");
                         MainContentControl.Content = new BeyazEsyaView();
                         break;
                     case "Tarihce":
-                        TxtPageTitle.Text = "Eski Fiyat Arşivi";
+                        SetPageHeader("Eski Fiyat Arşivi", "Geçmiş dönem fiyat kayıtları", PackIconKind.History, "#F59E0B", "#FFFBEB");
                         if (parameter is string group)
                             MainContentControl.Content = new TarihceView(group);
                         else
@@ -391,11 +401,11 @@ namespace ArcelikExcelApp
                         break;
 
                     case "YeniFiyat":
-                        TxtPageTitle.Text = "Maliyet Hesaplama";
+                        SetPageHeader("Maliyet Hesaplama", "Anlık fiyat ve maliyet hesaplama aracı", PackIconKind.CalculatorVariant, "#10B981", "#ECFDF5");
                         MainContentControl.Content = new YeniFiyatView();
                         break;
                     case "ExcelViewer":
-                        TxtPageTitle.Text = "Excel Görüntüleyici";
+                        SetPageHeader("Excel Görüntüleyici", "Yüklenen Excel dosyalarını görüntüle", PackIconKind.MicrosoftExcel, "#16A34A", "#F0FDF4");
                         MainContentControl.Content = new ExcelViewer();
                         break;
                     case "ManualCampaign":
@@ -404,7 +414,7 @@ namespace ArcelikExcelApp
                             _ = ModernDialogService.ShowAsync("Yetki Hatası", "Bu bölüme sadece yöneticiler erişebilir.", ModernDialogType.Warning);
                             return;
                         }
-                        TxtPageTitle.Text = "Kampanya Yönetimi";
+                        SetPageHeader("Kampanya Yönetimi", "Manuel kampanya tanımları ve yönetimi", PackIconKind.TagPlus, "#E11D48", "#FFF1F2");
                         MainContentControl.Content = new ManualCampaignView();
                         break;
                     case "UserManagement":
@@ -413,7 +423,7 @@ namespace ArcelikExcelApp
                             _ = ModernDialogService.ShowAsync("Yetki Hatası", "Bu bölüme sadece yöneticiler erişebilir.", ModernDialogType.Warning);
                             return;
                         }
-                        TxtPageTitle.Text = "Kullanıcı Yönetimi";
+                        SetPageHeader("Kullanıcı Yönetimi", "Sistem kullanıcıları ve yetki yönetimi", PackIconKind.AccountGroup, "#8B5CF6", "#F5F3FF");
                         MainContentControl.Content = new UserManagementView();
                         break;
                     case "Excell":
@@ -422,7 +432,7 @@ namespace ArcelikExcelApp
                             _ = ModernDialogService.ShowAsync("Yetki Hatası", "Bu bölüme sadece yöneticiler erişebilir.", ModernDialogType.Warning);
                             return;
                         }
-                        TxtPageTitle.Text = "Excel İçeri Aktar";
+                        SetPageHeader("Excel İçeri Aktar", "Fiyat listelerini sisteme aktar", PackIconKind.DatabaseImport, "#0EA5E9", "#F0F9FF");
                         MainContentControl.Content = new ExcelIslemleriView();
                         break;
                     case "FileManagement":
@@ -431,15 +441,15 @@ namespace ArcelikExcelApp
                             _ = ModernDialogService.ShowAsync("Yetki Hatası", "Bu bölüme sadece yöneticiler erişebilir.", ModernDialogType.Warning);
                             return;
                         }
-                        TxtPageTitle.Text = "Dosya Yönetimi";
+                        SetPageHeader("Dosya Yönetimi", "Yüklenen Excel dosyalarını yönet", PackIconKind.FileCog, "#64748B", "#F1F5F9");
                         MainContentControl.Content = new FileManagementView();
                         break;
                     case "Settings":
-                        TxtPageTitle.Text = "Ayarlar";
+                        SetPageHeader("Ayarlar", "Profil ve sistem ayarları", PackIconKind.CogOutline, "#475569", "#F8FAFC");
                         MainContentControl.Content = new SettingsView();
                         break;
                     case "Notifications":
-                        TxtPageTitle.Text = "Tüm Bildirimler";
+                        SetPageHeader("Tüm Bildirimler", "Sistem bildirimleri ve duyurular", PackIconKind.BellRing, "#F59E0B", "#FFFBEB");
                         MainContentControl.Content = new NotificationsView();
                         break;
                 }

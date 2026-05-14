@@ -22,6 +22,9 @@ namespace ArcelikExcelApp.Views
 
         private async Task LoadDashboardDataAsync()
         {
+            if (AuthService.CurrentUser == null) return;
+            int currentUserId = AuthService.CurrentUser.Id;
+
             try
             {
                 var data = await Task.Run(() =>
@@ -41,13 +44,13 @@ namespace ArcelikExcelApp.Views
                     decimal keaAvg = 0;
                     if (keaCount > 0)
                     {
-                        keaAvg = db.KeaProducts.Where(x => x.WholesalePrice30 > 0).Average(x => (decimal?)x.WholesalePrice30) ?? 0;
+                        keaAvg = db.KeaProducts.Where(x => x.WholesalePrice60 > 0).Average(x => (decimal?)x.WholesalePrice60) ?? 0;
                     }
                     
                     decimal wgAvg = 0;
                     if (wgCount > 0)
                     {
-                        wgAvg = db.WhiteGoodsProducts.Where(x => x.WholesalePrice30 > 0).Average(x => (decimal?)x.WholesalePrice30) ?? 0;
+                        wgAvg = db.WhiteGoodsProducts.Where(x => x.WholesalePrice60 > 0).Average(x => (decimal?)x.WholesalePrice60) ?? 0;
                     }
 
                     // 3. Kampanya Kullanım Oranı
@@ -63,10 +66,41 @@ namespace ArcelikExcelApp.Views
                     double keaRatio = totalProducts > 0 ? ((double)keaCount / totalProducts) * 100 : 0;
                     double wgRatio = totalProducts > 0 ? ((double)wgCount / totalProducts) * 100 : 0;
 
-                    // 5. (Kaldırıldı)
+                    // 5. Alt Kategori Dağılımı (KEA ve WG Birleşik)
+                    var keaSubCats = db.KeaProducts
+                        .GroupBy(x => x.ExcelFileType)
+                        .Select(g => new { Name = g.Key ?? "Diğer", Count = g.Count() })
+                        .ToList();
 
-                    // 6. Son Bildirimler
+                    var wgSubCats = db.WhiteGoodsProducts
+                        .GroupBy(x => x.ExcelFileType)
+                        .Select(g => new { Name = g.Key ?? "Diğer", Count = g.Count() })
+                        .ToList();
+
+                    var colors = new[] { "#6366F1", "#14B8A6", "#F59E0B", "#8B5CF6", "#EC4899", "#0EA5E9" };
+
+                    var allSubCats = keaSubCats.Concat(wgSubCats)
+                        .GroupBy(x => x.Name)
+                        .Select(g => new 
+                        { 
+                            CategoryName = g.Key, 
+                            Count = g.Sum(x => x.Count),
+                            Ratio = totalProducts > 0 ? ((double)g.Sum(x => x.Count) / totalProducts) * 100 : 0
+                        })
+                        .OrderByDescending(x => x.Count)
+                        .Take(6)
+                        .Select((x, index) => new 
+                        {
+                            x.CategoryName,
+                            x.Ratio,
+                            RatioText = $"%{x.Ratio:F1}",
+                            Color = colors[index % colors.Length]
+                        })
+                        .ToList();
+
+                    // 6. Son Bildirimler (FİLTRELİ)
                     var recentNotifications = db.Notifications
+                                                .Where(n => n.UserId == currentUserId || n.UserId == null)
                                                 .OrderByDescending(x => x.CreatedAt)
                                                 .Take(5)
                                                 .ToList();
@@ -75,11 +109,14 @@ namespace ArcelikExcelApp.Views
                     var lastUploadedFile = db.UploadedFiles.OrderByDescending(x => x.Id).FirstOrDefault();
                     string lastUpdateStr = lastUploadedFile != null ? lastUploadedFile.UploadDate : DateTime.Now.ToString("dd.MM.yyyy HH:mm");
 
+                    // 8. Kullanıcı İstatistikleri
+                    int totalUsers = db.Users.Count();
+
                     return new
                     {
                         keaCount, wgCount, totalProducts, totalCampaigns, totalCalculations, totalFiles,
-                        keaAvg, wgAvg, campaignRatio, keaRatio, wgRatio,
-                        recentNotifications, lastUpdateStr
+                        keaAvg, wgAvg, campaignRatio, keaRatio, wgRatio, allSubCats,
+                        recentNotifications, totalUsers, lastUpdateStr
                     };
                 });
 
@@ -87,6 +124,7 @@ namespace ArcelikExcelApp.Views
                 TxtTotalProducts.Text = data.totalProducts.ToString("N0");
                 TxtTotalFiles.Text = data.totalFiles.ToString("N0");
                 TxtTotalCampaigns.Text = data.totalCampaigns.ToString("N0");
+                TxtTotalUsers.Text = data.totalUsers.ToString();
 
                 TxtKeaAvgPrice.Text = $"{data.keaAvg:N0} ₺";
                 TxtWgAvgPrice.Text = $"{data.wgAvg:N0} ₺";
@@ -99,6 +137,35 @@ namespace ArcelikExcelApp.Views
 
                 TxtWgRatio.Text = $"%{data.wgRatio:F1}";
                 ProgWg.Value = data.wgRatio;
+
+                ListSubCategories.ItemsSource = data.allSubCats;
+
+                // Kullanıcı Bilgileri (AuthService üzerinden)
+                var user = AuthService.CurrentUser;
+                if (user != null)
+                {
+                    TxtUserDealer.Text = string.IsNullOrEmpty(user.DealerName) ? "Belirtilmemiş" : user.DealerName;
+                    TxtUserEmail.Text = user.Email;
+                    TxtUserRole.Text = user.Role;
+
+                    // Lisans Kalan Gün Hesaplama
+                    if (user.LicenseExpirationDate.HasValue)
+                    {
+                        var remainingDays = (user.LicenseExpirationDate.Value - DateTime.Now).Days;
+                        if (remainingDays > 0)
+                            TxtLicenseDays.Text = $" ({remainingDays} gün kaldı)";
+                        else if (remainingDays == 0)
+                            TxtLicenseDays.Text = " (Bugün son gün!)";
+                        else
+                            TxtLicenseDays.Text = " (Süresi doldu)";
+                    }
+                    else
+                    {
+                        TxtLicenseDays.Text = " (Sınırsız)";
+                    }
+                }
+
+                ListSubCategories.ItemsSource = data.allSubCats;
 
                 TxtSystemStatus.Text = "Sistem Güvende • Aktif";
                 TxtLastUpdate.Text = data.lastUpdateStr;

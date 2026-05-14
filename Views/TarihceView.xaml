@@ -7,24 +7,12 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0" Background="#1C2B4A" CornerRadius="10" Padding="24,16">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="History" Width="30" Height="30" Foreground="#F59E0B" VerticalAlignment="Center"/>
-                <StackPanel Margin="12,0,0,0">
-                    <TextBlock Text="Eski Fiyat Arşivi" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Geçmiş dönemlere ait fiyat listelerini inceleyin" FontSize="12" Foreground="#A0AEC0"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
         <!-- Filters -->
-        <Border Grid.Row="1" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,15">
+        <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,15">
             <WrapPanel Orientation="Horizontal">
                 <!-- Ürün Grubu -->
                 <StackPanel Margin="0,0,20,10">
@@ -85,7 +73,7 @@
         </Border>
 
         <!-- DataGrid -->
-        <materialDesign:Card Grid.Row="2" Margin="16" UniformCornerRadius="10">
+        <materialDesign:Card Grid.Row="1" Margin="16" UniformCornerRadius="10">
             <Grid>
                 <DataGrid x:Name="GridHistory" 
                           AutoGenerateColumns="False"
@@ -118,7 +106,7 @@
         </materialDesign:Card>
 
         <!-- Footer / Pagination -->
-        <Border Grid.Row="3" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="20,12">
+        <Border Grid.Row="2" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="20,12">
             <Grid>
                 <TextBlock x:Name="TxtTotalCount" Text="0 Ürün" VerticalAlignment="Center" Foreground="#64748B" FontWeight="SemiBold"/>
                 
@@ -135,7 +123,7 @@
         </Border>
 
         <!-- Loading Overlay -->
-        <Grid x:Name="OverlayLoading" Grid.RowSpan="4" Background="#AAFFFFFF" Visibility="Collapsed">
+        <Grid x:Name="OverlayLoading" Grid.RowSpan="3" Background="#AAFFFFFF" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" IsIndeterminate="True" Width="40" Height="40" Foreground="#E02020" HorizontalAlignment="Center"/>
                 <TextBlock Text="Veriler Yükleniyor..." Margin="0,12,0,0" FontWeight="SemiBold" Foreground="#1C2B4A"/>

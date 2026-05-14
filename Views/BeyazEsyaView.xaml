@@ -12,24 +12,13 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Başlık -->
-        <Border Grid.Row="0" Background="#1C2B4A" CornerRadius="10" Padding="24,16">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="WashingMachine" Width="30" Height="30" Foreground="#3B82F6" VerticalAlignment="Center"/>
-                <StackPanel Margin="12,0,0,0">
-                    <TextBlock Text="Beyaz Eşya Maliyetleri" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Sisteme kaydedilmiş Beyaz Eşya maliyet hesaplamaları sirkülerdeki 60 gün baz alınarak hesaplanmıştır." FontSize="12" Foreground="#A0AEC0"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
 
         <!-- Arama Çubuğu -->
-        <Border Grid.Row="1" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,12">
+        <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300"/>
@@ -65,7 +54,7 @@
         </Border>
 
         <!-- DataGrid -->
-        <materialDesign:Card Grid.Row="2" Margin="16,16,16,8" UniformCornerRadius="10">
+        <materialDesign:Card Grid.Row="1" Margin="16,16,16,8" UniformCornerRadius="10">
             <DataGrid x:Name="GridBeyazEsya" 
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -190,7 +179,7 @@
         </materialDesign:Card>
 
         <!-- Sayfalama (Pagination) -->
-        <Border Grid.Row="3" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,10">
+        <Border Grid.Row="2" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,10">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="BtnPrev" Content="Önceki" Style="{StaticResource MaterialDesignOutlinedButton}" 
                         Foreground="#E02020" BorderBrush="#E02020"
@@ -205,7 +194,7 @@
         </Border>
 
         <!-- Loading Overlay -->
-        <Grid x:Name="OverlayLoading" Grid.RowSpan="4" Background="#AAFFFFFF" Visibility="Collapsed">
+        <Grid x:Name="OverlayLoading" Grid.RowSpan="3" Background="#AAFFFFFF" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" IsIndeterminate="True" Width="40" Height="40" Foreground="#E02020" HorizontalAlignment="Center"/>
                 <TextBlock Text="Veriler Yükleniyor..." Margin="0,12,0,0" FontWeight="SemiBold" Foreground="#1C2B4A"/>
@@ -213,7 +202,7 @@
         </Grid>
 
         <!-- Valör Ayarları Overlay -->
-        <Grid x:Name="ValorSettingsOverlay" Grid.RowSpan="4" Background="#11000000" Visibility="Collapsed">
+        <Grid x:Name="ValorSettingsOverlay" Grid.RowSpan="3" Background="#11000000" Visibility="Collapsed">
             <materialDesign:Card Width="620" MaxHeight="750" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="20" Background="White">
                 <materialDesign:Card.Effect>
                     <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.15" Direction="270" ShadowDepth="10"/>
@@ -301,7 +290,7 @@
 
 
         <!-- Valör Dialog Overlay -->
-        <Grid x:Name="ValorDialogOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+        <Grid x:Name="ValorDialogOverlay" Grid.RowSpan="3" Visibility="Collapsed">
             <Border Background="#221A1A24">
                 <Border.Effect>
                     <BlurEffect Radius="10"/>
@@ -342,7 +331,7 @@
         </Grid>
 
         <!-- Eski Fiyatlar Dialog Overlay -->
-        <Grid x:Name="HistoryDialogOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+        <Grid x:Name="HistoryDialogOverlay" Grid.RowSpan="3" Visibility="Collapsed">
             <Border Background="#221A1A24">
                 <Border.Effect>
                     <BlurEffect Radius="10"/>
@@ -396,66 +385,109 @@
                 </Grid>
             </materialDesign:Card>
         </Grid>
-        <!-- Manuel Kampanya Detay Overlay -->
-        <Grid x:Name="ManualCampaignOverlay" Grid.RowSpan="4" Visibility="Collapsed">
-            <Border Background="#221A1A24">
-                <Border.Effect>
-                    <BlurEffect Radius="10"/>
-                </Border.Effect>
-            </Border>
-            <materialDesign:Card Width="500" MaxHeight="600" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="24" Background="White">
+        
+         <!-- Manuel Kampanya Detay Overlay -->
+        <Grid x:Name="ManualCampaignOverlay" Grid.RowSpan="3" Visibility="Collapsed">
+            <materialDesign:Card Width="600" MaxHeight="650" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="12" Background="White">
                 <materialDesign:Card.Effect>
-                    <DropShadowEffect Color="Black" BlurRadius="50" Opacity="0.1" Direction="270" ShadowDepth="10"/>
+                    <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.2" Direction="270" ShadowDepth="10"/>
                 </materialDesign:Card.Effect>
+                
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <!-- Sol Vurgu Çubuğu (Accent Bar) -->
+                    <Border Width="6" Background="#E11D48" HorizontalAlignment="Left" CornerRadius="12,0,0,12"/>
                     
-                    <!-- Header -->
-                    <Border Grid.Row="0" Background="#FFF1F2" Padding="28,24" CornerRadius="24,24,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="48" Height="48" Background="#FFE4E6" CornerRadius="14">
-                                <materialDesign:PackIcon Kind="TicketPercent" Width="26" Height="26" Foreground="#E11D48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Grid Margin="6,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Header -->
+                        <Border Grid.Row="0" Padding="32,24" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="48" Height="48" Background="#FFF1F2" CornerRadius="10">
+                                        <materialDesign:PackIcon Kind="TagCheck" Width="24" Height="24" Foreground="#E11D48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Margin="20,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="KAMPANYA DETAYI" FontSize="12" FontWeight="Black" Foreground="#E11D48" Margin="0,0,0,4"/>
+                                        <TextBlock x:Name="TxtManualCampaignProductName" Text="Ürün Bilgisi" FontSize="18" FontWeight="Bold" Foreground="#1E293B" TextTrimming="CharacterEllipsis" MaxWidth="400"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        Style="{StaticResource MaterialDesignIconButton}" Width="40" Height="40"
+                                        Click="BtnCloseManualCampaign_Click" Foreground="#94A3B8">
+                                    <materialDesign:PackIcon Kind="Close" Width="22" Height="22"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- Content -->
+                        <Grid Grid.Row="1">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
+                                <Border Padding="32,24">
+                                    <StackPanel>
+                                        <TextBlock Text="Aktif Koşullar" FontSize="13" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,16"/>
+                                        
+                                        <ItemsControl x:Name="IcManualCampaigns">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#F8FAFC" CornerRadius="8" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,12">
+                                                        <TextBlock Text="{Binding}" 
+                                                                   FontSize="15" 
+                                                                   LineHeight="26"
+                                                                   Foreground="#334155" 
+                                                                   TextWrapping="Wrap"
+                                                                   FontFamily="Segoe UI Semibold"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        
+                                        <Grid Margin="0,8,0,24">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <materialDesign:PackIcon Kind="ShieldCheck" Width="20" Height="20" Foreground="#10B981" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="Tüm kampanyalar doğrulanmış ve fiyata yansıtılmıştır." FontSize="13" Foreground="#10B981" FontWeight="SemiBold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </ScrollViewer>
+                            
+                            <!-- Scroll Fade Indicator -->
+                            <Border Height="50" VerticalAlignment="Bottom" IsHitTestVisible="False" CornerRadius="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#FFFFFFFF" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
                             </Border>
-                            <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Aktif Kampanyalar" FontSize="20" FontWeight="ExtraBold" Foreground="#881337"/>
-                                <TextBlock x:Name="TxtManualCampaignProductName" Text="Ürün Bilgisi" FontSize="13" Foreground="#BE123C" Opacity="0.8" TextTrimming="CharacterEllipsis" MaxWidth="350"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                    
-                    <!-- Content -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="28,24">
-                            <Border Background="#F8FAFC" BorderBrush="#F1F5F9" BorderThickness="1" CornerRadius="16" Padding="20">
-                                <TextBlock x:Name="TxtManualCampaignDescription" 
-                                           Text="Açıklama buraya gelecek." 
-                                           FontSize="15" 
-                                           LineHeight="26"
-                                           Foreground="#334155" 
-                                           TextWrapping="Wrap"
-                                           FontFamily="Segoe UI Semibold"/>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                    
-                    <!-- Footer -->
-                    <Border Grid.Row="2" Background="White" Padding="28,20" CornerRadius="0,0,24,24" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9">
-                        <Button Content="Anladım" HorizontalAlignment="Stretch" 
-                                Style="{StaticResource MaterialDesignFlatButton}" 
-                                Foreground="#E11D48" FontWeight="Black" FontSize="15"
-                                Height="48" materialDesign:ButtonAssist.CornerRadius="12"
-                                Click="BtnCloseManualCampaign_Click"/>
-                    </Border>
+                        </Grid>
+                        
+                        <!-- Footer -->
+                        <Border Grid.Row="2" Background="#F8FAFC" Padding="32,24" CornerRadius="0,0,12,0" BorderThickness="0,1,0,0" BorderBrush="#F1F5F9">
+                            <Grid>
+                                <TextBlock Text="Bilgi: Kampanya tarihleri stoklarla sınırlıdır." FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center" FontWeight="Medium"/>
+                                <Button Content="ANLADIM" 
+                                        HorizontalAlignment="Right"
+                                        Click="BtnCloseManualCampaign_Click"
+                                        Background="#1E293B" BorderBrush="#1E293B" Foreground="White"
+                                        FontWeight="Black" FontSize="14" Height="46" Padding="32,0"
+                                        materialDesign:ButtonAssist.CornerRadius="8"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </Grid>
             </materialDesign:Card>
         </Grid>
         
         <!-- Manuel Fiyat Giriş Overlay -->
-        <Grid x:Name="ManualPriceOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+        <Grid x:Name="ManualPriceOverlay" Grid.RowSpan="3" Visibility="Collapsed">
             <Border Background="#221A1A24">
                 <Border.Effect>
                     <BlurEffect Radius="10"/>
@@ -493,7 +525,7 @@
         </Grid>
 
         <!-- Sepet Seçim Overlay -->
-        <Grid x:Name="CartChoiceOverlay" Grid.RowSpan="4" Visibility="Collapsed">
+        <Grid x:Name="CartChoiceOverlay" Grid.RowSpan="3" Visibility="Collapsed">
             <Border Background="#221A1A24">
                 <Border.Effect>
                     <BlurEffect Radius="10"/>

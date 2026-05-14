@@ -7,24 +7,12 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Başlık -->
-        <Border Grid.Row="0" Background="#1C2B4A" CornerRadius="10" Padding="24,16">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="History" Width="30" Height="30" Foreground="#F59E0B" VerticalAlignment="Center"/>
-                <StackPanel Margin="12,0,0,0">
-                    <TextBlock Text="KEA Fiyat Tarihçesi" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Arşivlenmiş geçmiş dönem küçük ev aletleri fiyatları" FontSize="12" Foreground="#A0AEC0"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
         <!-- Filtreler -->
-        <Border Grid.Row="1" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,12">
+        <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -75,7 +63,7 @@
         </Border>
 
         <!-- DataGrid -->
-        <materialDesign:Card Grid.Row="2" Margin="16,16,16,8" UniformCornerRadius="10">
+        <materialDesign:Card Grid.Row="1" Margin="16,16,16,8" UniformCornerRadius="10">
             <DataGrid x:Name="GridHistory" 
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -99,7 +87,7 @@
         </materialDesign:Card>
 
         <!-- Pagination -->
-        <Border Grid.Row="3" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,10">
+        <Border Grid.Row="2" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="16,10">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="BtnPrev" Content="Önceki" Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnPrev_Click"/>
                 <TextBlock x:Name="TxtPageInfo" Text="Sayfa 1 / 1" VerticalAlignment="Center" Margin="16,0" FontWeight="SemiBold"/>
@@ -108,7 +96,7 @@
         </Border>
 
         <!-- Loading -->
-        <Grid x:Name="OverlayLoading" Grid.RowSpan="4" Background="#AAFFFFFF" Visibility="Collapsed">
+        <Grid x:Name="OverlayLoading" Grid.RowSpan="3" Background="#AAFFFFFF" Visibility="Collapsed">
             <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" IsIndeterminate="True" Foreground="#E02020" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
     </Grid>

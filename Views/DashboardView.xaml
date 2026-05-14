@@ -4,11 +4,8 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              Background="#F5F7FA"
              Loaded="UserControl_Loaded">
-    <UserControl.Resources>
-        <!-- İnce ScrollBar Stili -->
-        <Style TargetType="ScrollBar" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" />
-    </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Style="{StaticResource MaterialDesignScrollViewer}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  Style="{StaticResource MaterialDesignScrollViewer}">
         <Grid Margin="32">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -24,7 +21,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="Genel İstatistikler &amp; Dashboard" FontSize="32" FontWeight="Bold" Foreground="#1E293B"/>
+                    <TextBlock Text="Genel İstatistikler " FontSize="32" FontWeight="Bold" Foreground="#1E293B"/>
                     <TextBlock Text="Sistemdeki ürünlerin, fiyatların ve analizlerin güncel özeti" FontSize="15" Foreground="#64748B" Margin="0,6,0,0"/>
                 </StackPanel>
                 
@@ -106,7 +103,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <ProgressBar x:Name="ProgCampaign" Value="0" Height="12" Foreground="#3B82F6" Background="#E2E8F0" materialDesign:TransitionAssist.DisableTransitions="True" VerticalAlignment="Center" Margin="0,0,16,0" Style="{StaticResource MaterialDesignLinearProgressBar}"/>
+                                <ProgressBar x:Name="ProgCampaign" Value="0" Height="12" Foreground="#3B82F6" BorderBrush="#3B82F6" Background="#E2E8F0" materialDesign:TransitionAssist.DisableTransitions="True" VerticalAlignment="Center" Margin="0,0,16,0" Style="{StaticResource MaterialDesignLinearProgressBar}"/>
                                 <TextBlock Grid.Column="1" x:Name="TxtCampaignRatio" Text="%0" FontSize="24" FontWeight="ExtraBold" Foreground="#1E293B"/>
                             </Grid>
                         </StackPanel>
@@ -114,85 +111,181 @@
                 </materialDesign:Card>
             </UniformGrid>
 
-            <!-- Orta Bölüm (Finansal Veriler & Veri Dağılımı) -->
-            <Grid Grid.Row="2" Margin="0,0,0,24">
+            <!-- Orta Bölüm (Analitik & Veri Listeleri) -->
+            <Grid Grid.Row="2" Margin="0,0,0,32">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Sol Kısım: Finansal Ortalamalar Kartı (Premium Gradient) -->
-                <Border Grid.Column="0" CornerRadius="24" Margin="0,0,16,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#DC2626" Offset="0.0" />
-                            <GradientStop Color="#991B1B" Offset="1.0" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <!-- Shadow -->
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="20" Opacity="0.3" ShadowDepth="10" Color="#991B1B" />
-                    </Border.Effect>
-                    <Grid Margin="32">
+                <!-- Sol Taraf: Fiyatlar ve Liste -->
+                <Grid Grid.Column="0" Margin="0,0,12,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Üst: Fiyat Kartları (Yan Yana) -->
+                    <UniformGrid Grid.Row="0" Columns="2" Margin="0,0,0,24">
+                        <!-- KEA Ortalama Fiyat -->
+                        <materialDesign:Card Margin="0,0,12,0" UniformCornerRadius="24" Background="White" materialDesign:ElevationAssist.Elevation="Dp2">
+                            <Grid Margin="24">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="56" Height="56" Background="#FFF1F2" CornerRadius="16">
+                                        <materialDesign:PackIcon Kind="ChartLine" Width="28" Height="28" Foreground="#E11D48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Margin="20,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="KEA Ortalama" FontSize="13" FontWeight="SemiBold" Foreground="#64748B"/>
+                                        <TextBlock x:Name="TxtKeaAvgPrice" Text="0 ₺" FontSize="26" FontWeight="ExtraBold" Foreground="#1E293B" Margin="0,2,0,0"/>
+                                        <TextBlock Text="60 Günlük Valör" FontSize="11" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </materialDesign:Card>
+
+                        <!-- Beyaz Eşya Ortalama Fiyat -->
+                        <materialDesign:Card Margin="12,0,0,0" UniformCornerRadius="24" Background="White" materialDesign:ElevationAssist.Elevation="Dp2">
+                            <Grid Margin="24">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="56" Height="56" Background="#EFF6FF" CornerRadius="16">
+                                        <materialDesign:PackIcon Kind="Finance" Width="28" Height="28" Foreground="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Margin="20,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Beyaz Eşya Ortalama" FontSize="13" FontWeight="SemiBold" Foreground="#64748B"/>
+                                        <TextBlock x:Name="TxtWgAvgPrice" Text="0 ₺" FontSize="26" FontWeight="ExtraBold" Foreground="#1E293B" Margin="0,2,0,0"/>
+                                        <TextBlock Text="60 Günlük Valör" FontSize="11" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </materialDesign:Card>
+                    </UniformGrid>
+
+                    <!-- Alt: Kullanıcılar & Sistem Durumu -->
+                    <materialDesign:Card Grid.Row="1" UniformCornerRadius="24" Background="White" materialDesign:ElevationAssist.Elevation="Dp2">
+                        <Grid Margin="28">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Sol: Kullanıcı İstatistiği -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Top">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                    <Border Background="#F5F3FF" CornerRadius="8" Padding="6">
+                                        <materialDesign:PackIcon Kind="AccountGroup" Foreground="#8B5CF6" Width="20" Height="20"/>
+                                    </Border>
+                                    <TextBlock Text="Kayıtlı Kullanıcılar" FontSize="15" FontWeight="Bold" Foreground="#64748B" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock x:Name="TxtTotalUsers" Text="0" FontSize="48" FontWeight="ExtraBold" Foreground="#1E293B"/>
+                                <TextBlock Text="Sistemi aktif kullanan personel sayısı" FontSize="12" Foreground="#94A3B8" Margin="0,14,0,0"/>
+                            </StackPanel>
+
+                            <!-- Sağ: Profil & Bayi Bilgileri -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Border Background="#F0F9FF" CornerRadius="8" Padding="6">
+                                        <materialDesign:PackIcon Kind="BadgeAccountHorizontal" Foreground="#0284C7" Width="20" Height="20"/>
+                                    </Border>
+                                    <TextBlock Text="Hesap Bilgileri" FontSize="15" FontWeight="Bold" Foreground="#64748B" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <!-- Bayi Adı -->
+                                    <Grid Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="Bayi Adı" FontSize="11" Foreground="#94A3B8"/>
+                                            <TextBlock x:Name="TxtUserDealer" Text="---" FontSize="14" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- E-Posta -->
+                                    <Grid Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="E-Posta Adresi" FontSize="11" Foreground="#94A3B8"/>
+                                            <TextBlock x:Name="TxtUserEmail" Text="---" FontSize="13" Foreground="#475569" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Yetki ve Lisans -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Yetki Rolü" FontSize="11" Foreground="#94A3B8"/>
+                                            <Border Background="#F1F5F9" CornerRadius="4" HorizontalAlignment="Left" Padding="6,2" Margin="0,4,0,0">
+                                                <TextBlock x:Name="TxtUserRole" Text="User" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Lisans Durumu" FontSize="11" Foreground="#94A3B8"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                <TextBlock Text="Aktif" FontSize="12" FontWeight="Bold" Foreground="#059669"/>
+                                                <TextBlock x:Name="TxtLicenseDays" Text=" (--- gün)" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+
+                <!-- Sağ Taraf: Kategori Analizi (Tam Boy) -->
+                <materialDesign:Card Grid.Column="1" Margin="12,0,0,0" UniformCornerRadius="24" Background="White" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <Grid Margin="24">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,32">
-                            <Border Background="#B91C1C" CornerRadius="12" Padding="8">
-                                <materialDesign:PackIcon Kind="Finance" Width="28" Height="28" Foreground="White" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Ortalama Fiyat Analizleri (30 Günlük Toptan)" FontSize="22" FontWeight="Bold" Foreground="White" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                        
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <materialDesign:PackIcon Kind="Analytics" Width="22" Height="22" Foreground="#1E293B"/>
+                            <TextBlock Text="Kategori Analizi" FontSize="18" FontWeight="Bold" Foreground="#1E293B" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
-
-                        <Grid Grid.Row="1">
+                        
+                        <!-- Ana Gruplar -->
+                        <Grid Grid.Row="1" Margin="0,0,0,20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                <TextBlock Text="KEA Ortalama Fiyat" FontSize="16" FontWeight="Medium" Foreground="#FECACA"/>
-                                <TextBlock x:Name="TxtKeaAvgPrice" Text="0 ₺" FontSize="40" FontWeight="ExtraBold" Foreground="White" Margin="0,8,0,0"/>
+                            
+                            <StackPanel Margin="0,0,10,0">
+                                <TextBlock Text="KEA" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="TxtKeaRatio" Text="%0" FontSize="18" FontWeight="Bold" Foreground="#E11D48"/>
+                                <ProgressBar x:Name="ProgKea" Value="0" Height="4" Foreground="#E11D48" Background="#F1F5F9" BorderBrush="#E11D48" Margin="0,6,0,0"/>
                             </StackPanel>
 
-                            <Rectangle Grid.Column="1" Width="1" Fill="#FCA5A5" Margin="40,0" RadiusX="1" RadiusY="1" Opacity="0.5"/>
-
-                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                <TextBlock Text="Beyaz Eşya Ortalama Fiyat" FontSize="16" FontWeight="Medium" Foreground="#FECACA"/>
-                                <TextBlock x:Name="TxtWgAvgPrice" Text="0 ₺" FontSize="40" FontWeight="ExtraBold" Foreground="White" Margin="0,8,0,0"/>
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Beyaz Eşya" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="TxtWgRatio" Text="%0" FontSize="18" FontWeight="Bold" Foreground="#2563EB" />
+                                <ProgressBar x:Name="ProgWg" Value="0" Height="4" Foreground="#2563EB" Background="#F1F5F9" BorderBrush="#2563EB" Margin="0,6,0,0"/>
                             </StackPanel>
                         </Grid>
-                    </Grid>
-                </Border>
 
-                <!-- Sağ Kısım: Veritabanı Dağılımı -->
-                <materialDesign:Card Grid.Column="1" UniformCornerRadius="24" Background="White" materialDesign:ElevationAssist.Elevation="Dp2">
-                    <Grid Margin="28">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
-                                <materialDesign:PackIcon Kind="ChartDonut" Width="24" Height="24" Foreground="#1E293B"/>
-                                <TextBlock Text="Kategori Dağılımı" FontSize="20" FontWeight="Bold" Foreground="#1E293B" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- KEA -->
-                            <StackPanel Margin="0,0,0,24">
-                                <Grid Margin="0,0,0,10">
-                                    <TextBlock Text="Küçük Ev Aletleri" FontSize="15" FontWeight="SemiBold" Foreground="#475569" HorizontalAlignment="Left"/>
-                                    <TextBlock x:Name="TxtKeaRatio" Text="%0" FontSize="15" FontWeight="Bold" Foreground="#E11D48" HorizontalAlignment="Right"/>
-                                </Grid>
-                                <ProgressBar x:Name="ProgKea" Value="0" Height="10" Foreground="#E11D48" Background="#FFE4E6" materialDesign:TransitionAssist.DisableTransitions="True"/>
-                            </StackPanel>
-
-                            <!-- Beyaz Eşya -->
-                            <StackPanel Margin="0,0,0,20">
-                                <Grid Margin="0,0,0,10">
-                                    <TextBlock Text="Beyaz Eşya" FontSize="15" FontWeight="SemiBold" Foreground="#475569" HorizontalAlignment="Left"/>
-                                    <TextBlock x:Name="TxtWgRatio" Text="%0" FontSize="15" FontWeight="Bold" Foreground="#3B82F6" HorizontalAlignment="Right"/>
-                                </Grid>
-                                <ProgressBar x:Name="ProgWg" Value="0" Height="10" Foreground="#3B82F6" Background="#EFF6FF" materialDesign:TransitionAssist.DisableTransitions="True"/>
-                            </StackPanel>
+                        <!-- Alt Kategoriler -->
+                        <StackPanel Grid.Row="2">
+                            <TextBlock Text="Alt Kategori Yoğunluğu" FontSize="12" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,12"/>
+                            <ItemsControl x:Name="ListSubCategories">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding CategoryName}" FontSize="11" Foreground="#475569"/>
+                                                <ProgressBar Value="{Binding Ratio, Mode=OneWay}" Height="3" Foreground="{Binding Color}" BorderBrush="{Binding Color}" Background="#F8FAFC" Margin="0,4,0,0" Opacity="0.8"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding RatioText}" FontSize="11" FontWeight="SemiBold" Foreground="#64748B" VerticalAlignment="Top" Margin="12,0,0,0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Grid>
                 </materialDesign:Card>

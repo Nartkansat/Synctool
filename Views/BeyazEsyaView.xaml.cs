@@ -818,7 +818,15 @@ namespace ArcelikExcelApp.Views
             if (sender is Button btn && btn.DataContext is CalculationDisplayItem displayItem)
             {
                 TxtManualCampaignProductName.Text = $"{displayItem.ProductCode} - {displayItem.ProductName}";
-                TxtManualCampaignDescription.Text = displayItem.ManualCampaignText;
+                
+                var separator = new[] { "\n\n─────────────────\n\n" };
+                var campaigns = displayItem.ManualCampaignText.Split(separator, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(x => x.Trim())
+                                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                                    .ToList();
+                                    
+                IcManualCampaigns.ItemsSource = campaigns;
+                
                 ManualCampaignOverlay.Visibility = Visibility.Visible;
             }
         }
