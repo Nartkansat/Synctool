@@ -1,6 +1,6 @@
-using ArcelikApp.Models;
+﻿using Synctool.Models;
 
-namespace ArcelikApp.Excel.Mapping.Profiles
+namespace Synctool.Excel.Mapping.Profiles
 {
     /// <summary>
     /// Bulaşık Makinesi Excel dosyası kolon mapping profili.

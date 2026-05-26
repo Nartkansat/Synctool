@@ -1,8 +1,8 @@
-<Window x:Class="ArcelikExcelApp.MainWindow"
+﻿<Window x:Class="Synctool.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:converters="clr-namespace:ArcelikExcelApp.Converters"
+        xmlns:converters="clr-namespace:Synctool.Converters"
         Title="Synctool - Maliyet Hesaplama Aracı" Height="800" Width="1280"
         WindowStartupLocation="CenterScreen"
         WindowStyle="SingleBorderWindow"
@@ -254,6 +254,45 @@
                             </Grid.ColumnDefinitions>
                             <materialDesign:PackIcon Grid.Column="0" Kind="MicrosoftExcel" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="1" Text="Excel Görüntüleyici" FontSize="15" FontWeight="Medium" VerticalAlignment="Center"
+                                       Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="BtnStokMaliyet" Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="StokMaliyet" ToolTip="Stok Maliyet Analizi">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon Grid.Column="0" Kind="FilePercent" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Stok Maliyet Analizi" FontSize="15" FontWeight="Medium" VerticalAlignment="Center"
+                                       Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Grid>
+                    </Button>
+
+                    <TextBlock Text="KAMPANYALAR" Foreground="#3D4166" FontSize="11" FontWeight="Bold" Margin="15,10,0,6"
+                               Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <Button x:Name="BtnKampanyaBilgi" Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="KampanyaBilgi" ToolTip="Kampanya Bilgi">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon Grid.Column="0" Kind="InformationOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Kampanya Bilgi" FontSize="15" FontWeight="Medium" VerticalAlignment="Center"
+                                       Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="BtnKampanyaDegisim" Style="{StaticResource PremiumNavButton}" Click="Nav_Click" Tag="KampanyaDegisim" ToolTip="Kampanya Değişim">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon Grid.Column="0" Kind="FileReplaceOutline" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Kampanya Değişim" FontSize="15" FontWeight="Medium" VerticalAlignment="Center"
                                        Visibility="{Binding IsChecked, ElementName=MenuToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Grid>
                     </Button>
@@ -616,8 +655,10 @@
                     <Popup x:Name="PopupNotifications" AllowsTransparency="True" StaysOpen="False" 
                            Placement="Bottom" PlacementTarget="{Binding ElementName=BadgeNotifications}"
                            PopupAnimation="Slide" VerticalOffset="10">
-                        <materialDesign:Card Width="380" MaxHeight="500" UniformCornerRadius="18" Background="White" 
-                                           materialDesign:ElevationAssist.Elevation="Dp12" Margin="0,0,15,15">
+                        <Border Width="380" MaxHeight="500" CornerRadius="18" Background="White" Margin="15">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="25" Opacity="0.08" Direction="270" ShadowDepth="4"/>
+                            </Border.Effect>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -673,7 +714,7 @@
                                             HorizontalAlignment="Center" Foreground="#E02020" FontWeight="Bold" Click="BtnViewAllNotifications_Click"/>
                                 </Border>
                             </Grid>
-                        </materialDesign:Card>
+                        </Border>
                     </Popup>
                 </StackPanel>
             </Grid>

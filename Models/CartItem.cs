@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace ArcelikExcelApp.Models
+namespace Synctool.Models
 {
     public class CartItem
     {

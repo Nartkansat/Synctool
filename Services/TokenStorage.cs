@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.IO;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public static class TokenStorage
     {

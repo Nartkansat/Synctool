@@ -1,4 +1,4 @@
-<UserControl x:Class="ArcelikExcelApp.Views.BeyazEsyaView"
+﻿<UserControl x:Class="Synctool.Views.BeyazEsyaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -22,6 +22,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="220"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
@@ -36,11 +37,28 @@
                 </TextBox>
                 <materialDesign:PackIcon Kind="Magnify" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="#94A3B8"/>
 
-                <TextBlock Grid.Column="1" x:Name="TxtTotalCount" Text="Toplam: 0 Ürün" 
+                <!-- Valor Filter -->
+                <ComboBox x:Name="CboValorFilter" Grid.Column="1" Margin="16,0,0,0"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          materialDesign:TextFieldAssist.UnderlineBrush="#E02020"
+                          materialDesign:HintAssist.Hint="Fiyat Tipi (Valör)"
+                          Height="48"
+                          VerticalContentAlignment="Center"
+                          Padding="10,0"
+                          SelectionChanged="CboValorFilter_SelectionChanged">
+                    <ComboBoxItem Content="Ayarlanan Valörler" Tag="Personal" IsSelected="True"/>
+                    <ComboBoxItem Content="60 Günlük (Varsayılan)" Tag="WholesalePrice60"/>
+                    <ComboBoxItem Content="Peşin" Tag="CashPrice"/>
+                    <ComboBoxItem Content="30 Günlük" Tag="WholesalePrice30"/>
+                    <ComboBoxItem Content="90 Günlük" Tag="WholesalePrice90"/>
+                    <ComboBoxItem Content="120 Günlük" Tag="WholesalePrice120"/>
+                </ComboBox>
+
+                <TextBlock Grid.Column="2" x:Name="TxtTotalCount" Text="Toplam: 0 Ürün" 
                            VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16,0,0,0" Foreground="#64748B" FontWeight="SemiBold"/>
 
                 <!-- Valör Ayarları Butonu -->
-                <Button Grid.Column="2" x:Name="BtnOpenValorSettings"
+                <Button Grid.Column="3" x:Name="BtnOpenValorSettings"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
                         Foreground="#E02020" BorderBrush="#E02020"
                         Height="38" Padding="14,0"
@@ -98,8 +116,10 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Ürün Kodu" Binding="{Binding ProductCode}" Width="130"/>
                     <DataGridTextColumn Header="Ürün Adı" Binding="{Binding ProductName}" Width="*"/>
-                    <DataGridTextColumn Header="Baz Fiyat (60 gün)" Binding="{Binding PricePP, StringFormat={}{0:N2} ₺}" Width="140"/>
-                    <DataGridTextColumn Header="İndirim" Binding="{Binding PriceConversion, StringFormat={}{0:N2} ₺}" Width="100"/>
+                    <DataGridTextColumn Header="Valör" Binding="{Binding ActiveValorText}" Width="110"/>
+                    <DataGridTextColumn x:Name="ColBasePrice" Header="Baz Fiyat" Binding="{Binding PricePP, StringFormat={}{0:N2} ₺}" Width="140"/>
+                    <DataGridTextColumn Header="İndirim" Binding="{Binding DiscountAmount, StringFormat={}{0:N2} ₺}" Width="100"/>
+                    <DataGridTextColumn Header="Net İndirim" Binding="{Binding PriceConversion, StringFormat={}{0:N2} ₺}" Width="110"/>
                     <DataGridTextColumn Header="Net Maliyet" Binding="{Binding PurchasePrice, StringFormat={}{0:N2} ₺}" Width="120">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
@@ -192,7 +212,6 @@
                         Height="32" Padding="12,0" Margin="16,0,0,0" Click="BtnNext_Click"/>
             </StackPanel>
         </Border>
-
         <!-- Loading Overlay -->
         <Grid x:Name="OverlayLoading" Grid.RowSpan="3" Background="#AAFFFFFF" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -203,9 +222,9 @@
 
         <!-- Valör Ayarları Overlay -->
         <Grid x:Name="ValorSettingsOverlay" Grid.RowSpan="3" Background="#11000000" Visibility="Collapsed">
-            <materialDesign:Card Width="620" MaxHeight="750" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="20" Background="White">
+            <materialDesign:Card Width="960" VerticalAlignment="Center" HorizontalAlignment="Center" UniformCornerRadius="20" Background="White">
                 <materialDesign:Card.Effect>
-                    <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.15" Direction="270" ShadowDepth="10"/>
+                    <DropShadowEffect Color="Black" BlurRadius="20" Opacity="0.1" Direction="270" ShadowDepth="5"/>
                 </materialDesign:Card.Effect>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -215,15 +234,15 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
-                    <Border Grid.Row="0" Background="#FBFBFF" Padding="28,24" CornerRadius="20,20,0,0" BorderThickness="0,0,0,1" BorderBrush="#EEF2F6">
+                    <Border Grid.Row="0" Background="#FBFBFF" Padding="28,20" CornerRadius="20,20,0,0" BorderThickness="0,0,0,1" BorderBrush="#EEF2F6">
                         <Grid>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="48" Height="48" Background="#FEE2E2" CornerRadius="14">
-                                    <materialDesign:PackIcon Kind="CalendarClock" Width="26" Height="26" Foreground="#E02020" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border Width="44" Height="44" Background="#FEE2E2" CornerRadius="12">
+                                    <materialDesign:PackIcon Kind="CalendarClock" Width="24" Height="24" Foreground="#E02020" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="Kategori Bazlı Valör Ayarları" FontSize="19" FontWeight="Bold" Foreground="#1A1A24"/>
-                                    <TextBlock Text="Seçtiğiniz valörler o kategoriye ait tüm ürün maliyetlerini otomatik günceller." FontSize="13" Foreground="#64748B" Margin="0,3,0,0"/>
+                                <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Kategori Bazlı Valör Ayarları" FontSize="18" FontWeight="Bold" Foreground="#1A1A24"/>
+                                    <TextBlock Text="Seçtiğiniz valörler o kategoriye ait tüm ürün maliyetlerini otomatik günceller." FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
                                 </StackPanel>
                             </StackPanel>
                             <Button HorizontalAlignment="Right" Style="{StaticResource MaterialDesignIconButton}" 
@@ -233,20 +252,25 @@
                         </Grid>
                     </Border>
 
-                    <!-- Content: kategori listesi -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="28,20">
+                    <!-- Content: Kategori Grid Listesi -->
+                    <Grid Grid.Row="1" Margin="20,12">
                         <ItemsControl x:Name="IcValorSettings">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" Margin="0"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="12" Margin="0,0,0,12" Padding="20,16">
+                                    <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="12" Margin="8,6" Padding="18,12">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="220"/>
+                                                <ColumnDefinition Width="190"/>
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding CategoryName}" FontSize="15" FontWeight="Bold" Foreground="#1A1A24"/>
-                                                <TextBlock Text="{Binding ValorLabel}" FontSize="12" Foreground="#6B7280" Margin="0,4,0,0"/>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding CategoryName}" FontSize="14" FontWeight="Bold" Foreground="#1A1A24" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding ValorLabel}" FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"/>
                                             </StackPanel>
                                             <ComboBox Grid.Column="1"
                                                       ItemsSource="{Binding ValorChoices}"
@@ -256,29 +280,29 @@
                                                       Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                                       materialDesign:TextFieldAssist.UnderlineBrush="#E02020"
                                                       materialDesign:HintAssist.Hint="Valör Seçin"
-                                                      Height="48"
+                                                      Height="42"
                                                       VerticalContentAlignment="Center"
-                                                      Padding="16,0"/>
+                                                      Padding="12,0"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
+                    </Grid>
 
                     <!-- Footer -->
-                    <Border Grid.Row="2" Background="#FBFBFF" Padding="28,20" CornerRadius="0,0,20,20" BorderThickness="0,1,0,0" BorderBrush="#EEF2F6">
+                    <Border Grid.Row="2" Background="#FBFBFF" Padding="28,16" CornerRadius="0,0,20,20" BorderThickness="0,1,0,0" BorderBrush="#EEF2F6">
                         <Grid>
                             <TextBlock x:Name="TxtValorSaved" Text="✔ Ayarlar başarıyla güncellendi" 
                                        Foreground="#16A34A" FontWeight="SemiBold" FontSize="14"
                                        VerticalAlignment="Center" Visibility="Collapsed"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button Content="Vazgeç" Style="{StaticResource MaterialDesignFlatButton}" 
-                                        Foreground="#64748B" FontWeight="SemiBold" Height="44" Padding="24,0" Margin="0,0,12,0"
+                                        Foreground="#64748B" FontWeight="SemiBold" Height="40" Padding="20,0" Margin="0,0,12,0"
                                         Click="BtnCloseValorSettings_Click"/>
                                 <Button Content="Güncelle ve Kaydet" Background="#E02020" BorderBrush="#E02020" Foreground="White" 
-                                        FontWeight="Bold" materialDesign:ButtonAssist.CornerRadius="10"
-                                        Padding="32,0" Height="46"
+                                        FontWeight="Bold" materialDesign:ButtonAssist.CornerRadius="8"
+                                        Padding="28,0" Height="42"
                                         Click="BtnSaveValorSettings_Click">
                                 </Button>
                             </StackPanel>

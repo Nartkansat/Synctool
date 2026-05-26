@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     /// <summary>
     /// Her beyaz eşya kategorisi için hangi valör (WholesalePrice30/60/90/120) 
@@ -25,6 +25,16 @@ namespace ArcelikApp.Services
             "Solo Pişirici",
             "Kurutma Makinesi",
             "Televizyon"
+        };
+ 
+        // Desteklenen KEA kategorileri (ExcelFileType değerleri)
+        public static readonly string[] KeaCategories = new[]
+        {
+            "Mutfak",
+            "Süpürge ve Ütü",
+            "Diğer Elektronik",
+            "Cep Telefonu",
+            "Elektronik"
         };
 
         // Desteklenen valör seçenekleri

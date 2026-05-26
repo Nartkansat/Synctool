@@ -1,5 +1,5 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
+﻿using Synctool.Data;
+using Synctool.Models;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using ArcelikApp.Services;
+using Synctool.Services;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class YeniFiyatView : UserControl
     {
@@ -407,6 +407,17 @@ namespace ArcelikExcelApp.Views
                     CreatedDate       = DateTime.Now
                 }).ToList();
 
+                // Hangi kategorileri (SourceTable) kaydediyoruz?
+                var sourceTables = _currentRows.Select(r => r.Kategori == "KEA" ? "Kea" : "WhiteGoods").Distinct().ToList();
+
+                // Önce bu kategorilerin mevcut hesaplamalarını temizle
+                foreach (var sourceTable in sourceTables)
+                {
+                    var existing = db.CostCalculations.Where(c => c.SourceTable == sourceTable).ToList();
+                    if (existing.Any())
+                        db.CostCalculations.RemoveRange(existing);
+                }
+
                 db.CostCalculations.AddRange(entities);
                 db.SaveChanges();
 
@@ -445,7 +456,7 @@ namespace ArcelikExcelApp.Views
                 };
                 if (dlg.ShowDialog() != true) return;
 
-                ExcelPackage.License.SetNonCommercialPersonal("ArcelikApp");
+                ExcelPackage.License.SetNonCommercialPersonal("Synctool");
                 using var package = new ExcelPackage();
                 var ws = package.Workbook.Worksheets.Add("Maliyet Hesabı");
 

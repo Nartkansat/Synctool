@@ -1,19 +1,19 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System.Linq;
-using ArcelikApp.Data;
-using ArcelikApp.Models;
-using ArcelikApp.Excel.Mapping;
-using ArcelikApp.Excel.Processors;
+using Synctool.Data;
+using Synctool.Models;
+using Synctool.Excel.Mapping;
+using Synctool.Excel.Processors;
 using System.IO;
 using System.Threading.Tasks;
 using System;
-using ArcelikApp.Services;
+using Synctool.Services;
 
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class ExcelIslemleriView : UserControl
     {
@@ -208,7 +208,7 @@ namespace ArcelikExcelApp.Views
             if (!isHistoryMode)
             {
                 string fileName = System.IO.Path.GetFileName(_selectedFilePath);
-                using (var context = new ArcelikApp.Data.AppDbContext())
+                using (var context = new Synctool.Data.AppDbContext())
                 {
                     if (context.UploadedFiles.Any(f => f.FileName == fileName))
                     {
@@ -221,7 +221,7 @@ namespace ArcelikExcelApp.Views
             // Geçmiş fiyat modunda, aynı ay/yıl/tip kombinasyonu zaten mevcut mu kontrol et
             if (isHistoryMode && (categoryName == "Beyaz Eşya" || categoryName == "Kea"))
             {
-                using (var context = new ArcelikApp.Data.AppDbContext())
+                using (var context = new Synctool.Data.AppDbContext())
                 {
                     bool alreadyExists = false;
                     if (categoryName == "Beyaz Eşya")
@@ -283,13 +283,11 @@ namespace ArcelikExcelApp.Views
                     }
                     else
                     {
-                        // Normal mod: dosyayı uygulama içine kopyala ve kaydet
-                        string relativePath = FileHelper.CopyToStorage(_selectedFilePath);
-
+                        // Normal mod: içeriği doğrudan veritabanına kaydet (fiziksel kopya oluşturma)
                         var newFile = new UploadedFile
                         {
                             FileName   = Path.GetFileName(_selectedFilePath),
-                            FilePath   = relativePath,
+                            FilePath   = string.Empty,
                             FileData   = File.ReadAllBytes(_selectedFilePath),
                             Category   = categoryName,
                             UploadDate = DateTime.Now.ToString("dd.MM.yyyy")
@@ -298,20 +296,12 @@ namespace ArcelikExcelApp.Views
                         context.SaveChanges();
                         fileId = newFile.Id;
 
-                        // İşleme için artık kopyalanan dosyayı kullanabiliriz
-                        string absoluteStoragePath = FileHelper.GetAbsolutePath(relativePath);
-
-                        string originalPath = _selectedFilePath;
-                        _selectedFilePath = absoluteStoragePath;
-
                         if (categoryName == "Oliz Kampanya")
                             ProcessOlizExcel(context, fileId, worksheetName, mergeOliz);
                         else if (categoryName == "Beyaz Eşya")
                             importedCount = ProcessWhiteGoodsExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: false);
                         else if (categoryName == "Kea")
                             importedCount = ProcessKeaExcel(context, fileId, whiteGoodsType, selectedMonth, selectedYear, isHistoryOnly: false);
-
-                        _selectedFilePath = originalPath;
                     }
                 });
 
@@ -423,28 +413,64 @@ namespace ArcelikExcelApp.Views
             return products.Count;
         }
 
+        private int EnsureDummyUploadedFile(AppDbContext context)
+        {
+            var dummy = context.UploadedFiles.FirstOrDefault(f => f.FileName == "Arşivlenmiş Dosya Verisi");
+            if (dummy == null)
+            {
+                dummy = new UploadedFile
+                {
+                    FileName = "Arşivlenmiş Dosya Verisi",
+                    FilePath = string.Empty,
+                    FileData = Array.Empty<byte>(),
+                    Category = "Sistem",
+                    UploadDate = DateTime.Now.ToString("dd.MM.yyyy")
+                };
+                context.UploadedFiles.Add(dummy);
+                context.SaveChanges();
+            }
+            return dummy.Id;
+        }
+
         private void ArchiveExistingDataIfNewer(AppDbContext context, int newMonth, int newYear, string category)
         {
-            // Mevcut güncel verileri bul
-            var currentData = context.WhiteGoodsProducts
-                .Where(p => p.ExcelFileType == category)
-                .ToList();
+            // Mevcut tüm güncel verileri bul
+            var currentData = context.WhiteGoodsProducts.ToList();
 
             if (!currentData.Any()) return;
-
-            var first = currentData.First();
             
-            // Eğer veritabanındaki veri, yeni gelenden daha eskiyse arşivle
-            bool isOlder = (first.PeriodYear < newYear) || (first.PeriodYear == newYear && first.PeriodMonth < newMonth);
+            // Yeni yüklenen aydan daha eski olan verileri bul
+            var oldData = currentData
+                .Where(p => p.PeriodYear < newYear || (p.PeriodYear == newYear && p.PeriodMonth < newMonth))
+                .ToList();
 
-            if (isOlder)
+            if (oldData.Any())
             {
-                var historyEntries = currentData.Select(p => MapToHistory(p, p.PeriodMonth, p.PeriodYear)).ToList();
+                int dummyFileId = EnsureDummyUploadedFile(context);
+
+                var historyEntries = oldData.Select(p => 
+                {
+                    var h = MapToHistory(p, p.PeriodMonth, p.PeriodYear);
+                    h.UploadedFileId = dummyFileId; // Cascade delete'ten korumak için dummy dosyaya bağlıyoruz
+                    return h;
+                }).ToList();
+
                 context.HistoricalWhiteGoodsProducts.AddRange(historyEntries);
                 
-                // Arşivledikten sonra güncel tablodan bu kategoriyi temizle (çünkü yeni ayın verisi gelecek)
-                context.WhiteGoodsProducts.RemoveRange(currentData);
+                // Eski verileri güncel tablodan temizle
+                context.WhiteGoodsProducts.RemoveRange(oldData);
                 context.SaveChanges();
+
+                // Eski UploadedFile kayıtlarını sil
+                var oldFileIds = oldData.Select(p => p.UploadedFileId).Distinct().ToList();
+                var oldFiles = context.UploadedFiles
+                    .Where(f => oldFileIds.Contains(f.Id) && f.Category == "Beyaz Eşya")
+                    .ToList();
+                if (oldFiles.Any())
+                {
+                    context.UploadedFiles.RemoveRange(oldFiles);
+                    context.SaveChanges();
+                }
             }
         }
 
@@ -529,26 +555,43 @@ namespace ArcelikExcelApp.Views
 
         private void ArchiveExistingKeaDataIfNewer(AppDbContext context, int newMonth, int newYear, string category)
         {
-            // Mevcut güncel verileri bul
-            var currentData = context.KeaProducts
-                .Where(p => p.ExcelFileType == category)
-                .ToList();
+            // Mevcut tüm güncel verileri bul
+            var currentData = context.KeaProducts.ToList();
 
             if (!currentData.Any()) return;
 
-            var first = currentData.First();
+            // Yeni yüklenen aydan daha eski olan verileri bul
+            var oldData = currentData
+                .Where(p => p.PeriodYear < newYear || (p.PeriodYear == newYear && p.PeriodMonth < newMonth))
+                .ToList();
 
-            // Eğer veritabanındaki veri, yeni gelenden daha eskiyse arşivle
-            bool isOlder = (first.PeriodYear < newYear) || (first.PeriodYear == newYear && first.PeriodMonth < newMonth);
-
-            if (isOlder)
+            if (oldData.Any())
             {
-                var historyEntries = currentData.Select(p => MapToKeaHistory(p, p.PeriodMonth, p.PeriodYear)).ToList();
+                int dummyFileId = EnsureDummyUploadedFile(context);
+
+                var historyEntries = oldData.Select(p => 
+                {
+                    var h = MapToKeaHistory(p, p.PeriodMonth, p.PeriodYear);
+                    h.UploadedFileId = dummyFileId; // Cascade delete'ten korumak için dummy dosyaya bağlıyoruz
+                    return h;
+                }).ToList();
+
                 context.HistoricalKeaProducts.AddRange(historyEntries);
 
-                // Arşivledikten sonra güncel tablodan bu kategoriyi temizle (çünkü yeni ayın verisi gelecek)
-                context.KeaProducts.RemoveRange(currentData);
+                // Eski verileri güncel tablodan temizle
+                context.KeaProducts.RemoveRange(oldData);
                 context.SaveChanges();
+
+                // Eski UploadedFile kayıtlarını sil
+                var oldFileIds = oldData.Select(p => p.UploadedFileId).Distinct().ToList();
+                var oldFiles = context.UploadedFiles
+                    .Where(f => oldFileIds.Contains(f.Id) && f.Category == "Kea")
+                    .ToList();
+                if (oldFiles.Any())
+                {
+                    context.UploadedFiles.RemoveRange(oldFiles);
+                    context.SaveChanges();
+                }
             }
         }
 
@@ -582,43 +625,57 @@ namespace ArcelikExcelApp.Views
         {
             var mergedCampaigns = new Dictionary<string, OlizCampaign>();
 
-            if (mergeWithPrevious)
+            // Önceki tüm Oliz dosyalarını bul (kendisi hariç) — eski kampanyaları sil
+            var previousFiles = context.UploadedFiles
+                .Where(f => f.Category == "Oliz Kampanya" && f.Id < fileId)
+                .OrderByDescending(f => f.Id)
+                .ToList();
+
+            if (mergeWithPrevious && previousFiles.Any())
             {
-                // Önceki en güncel Oliz dosyasını bul (kendisi hariç)
-                var previousFile = context.UploadedFiles
-                    .Where(f => f.Category == "Oliz Kampanya" && f.Id < fileId)
-                    .OrderByDescending(f => f.Id)
-                    .FirstOrDefault();
-
-                if (previousFile != null)
+                // En güncel önceki dosyanın kampanyalarını yeni dosyaya taşı
+                var latestPrevFile = previousFiles.First();
+                var oldCampaigns = context.OlizCampaigns
+                    .Where(c => c.UploadedFileId == latestPrevFile.Id)
+                    .ToList();
+                foreach (var c in oldCampaigns)
                 {
-                    var oldCampaigns = context.OlizCampaigns.Where(c => c.UploadedFileId == previousFile.Id).ToList();
-                    foreach (var c in oldCampaigns)
+                    var copy = new OlizCampaign
                     {
-                        var copy = new OlizCampaign
-                        {
-                            Brand = c.Brand,
-                            ProductGroup = c.ProductGroup,
-                            ProductCode = c.ProductCode,
-                            ProductDescription = c.ProductDescription,
-                            DiscountAmount = c.DiscountAmount,
-                            DiscountNetAmount = c.DiscountNetAmount,
-                            CampaignStartDate = c.CampaignStartDate,
-                            CampaignEndDate = c.CampaignEndDate,
-                            LastTransportDate = c.LastTransportDate,
-                            LastBarcodeScanDate = c.LastBarcodeScanDate,
-                            CampaignCode = c.CampaignCode,
-                            CampaignShortDescription = c.CampaignShortDescription,
-                            GeneralDescription = c.GeneralDescription,
-                            UploadedFileId = fileId // Yeni dosya ID'sine bağlıyoruz
-                        };
+                        Brand = c.Brand,
+                        ProductGroup = c.ProductGroup,
+                        ProductCode = c.ProductCode,
+                        ProductDescription = c.ProductDescription,
+                        DiscountAmount = c.DiscountAmount,
+                        DiscountNetAmount = c.DiscountNetAmount,
+                        CampaignStartDate = c.CampaignStartDate,
+                        CampaignEndDate = c.CampaignEndDate,
+                        LastTransportDate = c.LastTransportDate,
+                        LastBarcodeScanDate = c.LastBarcodeScanDate,
+                        CampaignCode = c.CampaignCode,
+                        CampaignShortDescription = c.CampaignShortDescription,
+                        GeneralDescription = c.GeneralDescription,
+                        UploadedFileId = fileId // Yeni dosya ID'sine bağlıyoruz
+                    };
 
-                        string key = c.ProductCode?.Trim().ToUpperInvariant() ?? string.Empty;
-                        if (!string.IsNullOrEmpty(key))
-                            mergedCampaigns[key] = copy;
-                    }
+                    string key = c.ProductCode?.Trim().ToUpperInvariant() ?? string.Empty;
+                    if (!string.IsNullOrEmpty(key))
+                        mergedCampaigns[key] = copy;
                 }
             }
+
+            // Tüm eski Oliz dosyalarının kampanyalarını ve kayıtlarını temizle
+            foreach (var prevFile in previousFiles)
+            {
+                var oldCampaignsToDelete = context.OlizCampaigns
+                    .Where(c => c.UploadedFileId == prevFile.Id)
+                    .ToList();
+                if (oldCampaignsToDelete.Any())
+                    context.OlizCampaigns.RemoveRange(oldCampaignsToDelete);
+
+                context.UploadedFiles.Remove(prevFile);
+            }
+            context.SaveChanges();
 
             using var package = new ExcelPackage(new FileInfo(_selectedFilePath));
             var worksheet     = package.Workbook.Worksheets[sheetName];
@@ -658,7 +715,6 @@ namespace ArcelikExcelApp.Views
                 else
                 {
                     // Ürün kodu yok ama kampanya kodu var (nadiren olabilir)
-                    // Benzersiz bir key uydurup dictionary'ye atalım ki eklensin
                     mergedCampaigns[Guid.NewGuid().ToString()] = campaign;
                 }
             }

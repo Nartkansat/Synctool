@@ -1,6 +1,6 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
-using ArcelikApp.Services;
+﻿using Synctool.Data;
+using Synctool.Models;
+using Synctool.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class BeyazEsyaTarihceView : UserControl
     {

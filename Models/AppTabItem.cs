@@ -1,8 +1,8 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 
-namespace ArcelikExcelApp.Models
+namespace Synctool.Models
 {
     public class AppTabItem : INotifyPropertyChanged
     {

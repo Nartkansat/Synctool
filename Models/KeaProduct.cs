@@ -1,4 +1,4 @@
-namespace ArcelikApp.Models
+﻿namespace Synctool.Models
 {
     public class KeaProduct
     {

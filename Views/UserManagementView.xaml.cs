@@ -1,6 +1,6 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
-using ArcelikApp.Services;
+﻿using Synctool.Data;
+using Synctool.Models;
+using Synctool.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class UserManagementView : UserControl
     {
@@ -94,6 +94,7 @@ namespace ArcelikExcelApp.Views
             using (var db = new AppDbContext())
                 TxtNewLicenseKey.Text = AuthService.GenerateUniqueLicenseKey(db);
 
+            ValidateNewUserPassword("");
             TxtUserError.Visibility = Visibility.Collapsed;
             DialogOverlay.Visibility = Visibility.Visible;
         }
@@ -131,9 +132,9 @@ namespace ArcelikExcelApp.Views
                 return;
             }
 
-            if (password.Length < 6)
+            if (password.Length < 8 || !password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(c => !char.IsLetterOrDigit(c)))
             {
-                ShowUserError("Şifre en az 6 karakter olmalıdır.");
+                ShowUserError("Şifre en az 8 karakter olmalı, en az 1 büyük harf, 1 küçük harf ve 1 özel karakter (sembol) içermelidir.");
                 return;
             }
 
@@ -346,29 +347,37 @@ namespace ArcelikExcelApp.Views
         {
             if (((Button)sender).DataContext is User user)
             {
-                try
+                var result = await ModernDialogService.ShowAsync("Oturumu Sıfırla",
+                    $"{user.Username} kullanıcısının mevcut oturumunu sıfırlamak istiyor musunuz?",
+                    ModernDialogType.Question);
+
+                if (result)
                 {
-                    int userId = user.Id;
-                    string userName = user.Username;
-                    await Task.Run(() =>
+                    try
                     {
-                        using var db = new AppDbContext();
-                        var dbUser = db.Users.Find(userId);
-                        if (dbUser != null)
+                        int userId = user.Id;
+                        string userName = user.Username;
+                        await Task.Run(() =>
                         {
-                            dbUser.CurrentSessionId = null;
-                            db.SaveChanges();
-                        }
-                    });
-                    _ = ModernDialogService.ShowAsync("Başarılı", $"{userName} kullanıcısının oturumu sıfırlandı.", ModernDialogType.Success);
-                    await LoadUsersAsync();
-                }
-                catch (Exception ex)
-                {
-                    _ = ModernDialogService.ShowAsync("Hata", $"Hata: {ex.Message}", ModernDialogType.Error);
+                            using var db = new AppDbContext();
+                            var dbUser = db.Users.Find(userId);
+                            if (dbUser != null)
+                            {
+                                dbUser.CurrentSessionId = null;
+                                db.SaveChanges();
+                            }
+                        });
+                        _ = ModernDialogService.ShowAsync("Başarılı", $"{userName} kullanıcısının oturumu sıfırlandı.", ModernDialogType.Success);
+                        await LoadUsersAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _ = ModernDialogService.ShowAsync("Hata", $"Hata: {ex.Message}", ModernDialogType.Error);
+                    }
                 }
             }
         }
+
 
         // ─── Cihaz Sıfırla ───────────────────────────────────────────────────
         private async void BtnResetDevice_Click(object sender, RoutedEventArgs e)
@@ -459,6 +468,64 @@ namespace ArcelikExcelApp.Views
             {
                 TxtNotifyError.Text = $"Hata: {ex.Message}";
                 TxtNotifyError.Visibility = Visibility.Visible;
+            }
+        }
+
+        // ─── Şifre Doğrulama İşlemleri ──────────────────────────────────────
+        private void TxtNewPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            ValidateNewUserPassword(TxtNewPassword.Password);
+        }
+
+        private void TxtNewPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ValidateNewUserPassword(TxtNewPasswordVisible.Text);
+        }
+
+        private void ValidateNewUserPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+            {
+                SetRuleNeutral(IconNewLength, TxtNewLength);
+                SetRuleNeutral(IconNewUpper, TxtNewUpper);
+                SetRuleNeutral(IconNewLower, TxtNewLower);
+                SetRuleNeutral(IconNewSymbol, TxtNewSymbol);
+                return;
+            }
+
+            bool isLengthValid = password.Length >= 8;
+            bool isUpperValid = password.Any(char.IsUpper);
+            bool isLowerValid = password.Any(char.IsLower);
+            bool isSymbolValid = password.Any(c => !char.IsLetterOrDigit(c));
+
+            UpdateRuleUI(IconNewLength, TxtNewLength, isLengthValid);
+            UpdateRuleUI(IconNewUpper, TxtNewUpper, isUpperValid);
+            UpdateRuleUI(IconNewLower, TxtNewLower, isLowerValid);
+            UpdateRuleUI(IconNewSymbol, TxtNewSymbol, isSymbolValid);
+        }
+
+        private void SetRuleNeutral(MaterialDesignThemes.Wpf.PackIcon icon, TextBlock text)
+        {
+            if (icon == null || text == null) return;
+            icon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CircleOutline;
+            icon.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8"));
+            text.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#64748B"));
+        }
+
+        private void UpdateRuleUI(MaterialDesignThemes.Wpf.PackIcon icon, TextBlock text, bool isValid)
+        {
+            if (icon == null || text == null) return;
+            if (isValid)
+            {
+                icon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CheckCircle;
+                icon.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
+                text.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#047857"));
+            }
+            else
+            {
+                icon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CloseCircleOutline;
+                icon.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
+                text.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#991B1B"));
             }
         }
     }

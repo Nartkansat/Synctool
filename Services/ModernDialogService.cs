@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public enum ModernDialogType
     {

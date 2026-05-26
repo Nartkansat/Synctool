@@ -1,12 +1,12 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
+﻿using Synctool.Data;
+using Synctool.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Toolkit.Uwp.Notifications;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public class NotificationService
     {

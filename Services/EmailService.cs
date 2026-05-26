@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public static class EmailService
     {

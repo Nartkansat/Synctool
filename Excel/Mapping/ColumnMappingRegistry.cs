@@ -1,8 +1,8 @@
-using ArcelikApp.Excel.Mapping.Profiles;
+﻿using Synctool.Excel.Mapping.Profiles;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ArcelikApp.Excel.Mapping
+namespace Synctool.Excel.Mapping
 {
     /// <summary>
     /// Tüm WhiteGoods Excel profilleri burada kayıtlıdır.
@@ -28,12 +28,15 @@ namespace ArcelikApp.Excel.Mapping
             // --- KEA ---
             { "Mutfak",            KeaMutfakMappingProfile.Get()         },
             { "Süpürge ve Ütü",    KeaSupurgeUtuMappingProfile.Get()     },
+            { "Diğer Elektronik",  KeaDigerElektronikMappingProfile.Get() },
+            { "Cep Telefonu",      KeaCepTelefonuMappingProfile.Get()    },
+            { "Elektronik",        KeaElektronikMappingProfile.Get()     },
         };
 
         private static readonly Dictionary<string, List<string>> _categoryMap = new(System.StringComparer.OrdinalIgnoreCase)
         {
             { "Beyaz Eşya", new() { "Ankastre", "Soğutucu", "Çamaşır Makinesi", "Bulaşık Makinesi", "Televizyon", "Klima", "Kurutma Makinesi", "Solo Pişirici", "Isıtıcı Aletler", "Havalandırma" } },
-            { "Kea",        new() { "Mutfak", "Süpürge ve Ütü" } }
+            { "Kea",        new() { "Mutfak", "Süpürge ve Ütü", "Diğer Elektronik", "Cep Telefonu", "Elektronik" } }
         };
 
         public static ColumnMappingProfile? GetProfile(string fileTypeName)

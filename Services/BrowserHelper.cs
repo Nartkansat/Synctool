@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using ArcelikApp.Services;
+using Synctool.Services;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public static class BrowserHelper
     {

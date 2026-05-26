@@ -1,7 +1,7 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
-using ArcelikApp.Services;
-using ArcelikApp.Excel.Mapping;
+﻿using Synctool.Data;
+using Synctool.Models;
+using Synctool.Services;
+using Synctool.Excel.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class KeaTarihceView : UserControl
     {

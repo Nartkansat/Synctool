@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using ArcelikExcelApp.Views;
-using ArcelikApp.Services;
+using Synctool.Views;
+using Synctool.Services;
 
-namespace ArcelikExcelApp;
+namespace Synctool;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -36,7 +36,7 @@ public partial class App : Application
         bool autoLoginSuccess = false;
         try
         {
-            autoLoginSuccess = await ArcelikApp.Services.AuthService.CheckAutoLoginAsync();
+            autoLoginSuccess = await Synctool.Services.AuthService.CheckAutoLoginAsync();
         }
         catch { }
 
@@ -72,17 +72,11 @@ public partial class App : Application
                 .Any(p => p.ProcessName.Equals(WampProcessName, StringComparison.OrdinalIgnoreCase));
 
             if (calisiyorMu)
-            {
-                Debug.WriteLine($"{WampProcessName} zaten çalışıyor.");
                 return;
-            }
 
             // Kurulu mu?
             if (!File.Exists(WampExePath))
-            {
-                Debug.WriteLine($"WampServer bulunamadı: {WampExePath}");
                 return;
-            }
 
             // Başlat (yönetici olarak)
             try
@@ -94,21 +88,16 @@ public partial class App : Application
                     Verb            = "runas"
                 };
                 Process.Start(startInfo);
-                Debug.WriteLine($"{WampProcessName} başlatıldı.");
             }
-            catch (System.ComponentModel.Win32Exception ex)
+            catch (System.ComponentModel.Win32Exception)
             {
-                Debug.WriteLine($"WampManager başlatılamadı: {ex.Message}");
                 return;
             }
 
             // WAMP process görünene kadar max 10 sn bekle (async)
             await WaitForProcessAsync(WampProcessName, timeoutSeconds: 10);
         }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"EnsureWampRunning hatası: {ex.Message}");
-        }
+        catch { }
     }
 
     private static async Task WaitForProcessAsync(string processName, int timeoutSeconds)
@@ -127,7 +116,5 @@ public partial class App : Application
             await Task.Delay(interval);
             elapsed += interval;
         }
-
-        Debug.WriteLine($"{processName} {timeoutSeconds} saniye içinde başlamadı, devam ediliyor.");
     }
 }

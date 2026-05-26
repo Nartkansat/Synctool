@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace ArcelikApp.Excel.Mapping
+namespace Synctool.Excel.Mapping
 {
     /// <summary>
     /// Bir Excel dosya tipinin hangi kolonlarını hangi DB alanlarına eşleyeceğini tanımlar.

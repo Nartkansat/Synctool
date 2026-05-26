@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using ArcelikExcelApp.Models;
+using Synctool.Models;
 
-namespace ArcelikExcelApp.Services
+namespace Synctool.Services
 {
     public class CartService
     {

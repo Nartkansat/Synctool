@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace ArcelikExcelApp.Converters
+namespace Synctool.Converters
 {
     public class ParoluTextConverter : IValueConverter
     {

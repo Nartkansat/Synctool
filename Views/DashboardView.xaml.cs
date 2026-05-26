@@ -1,12 +1,12 @@
-using ArcelikApp.Data;
-using ArcelikApp.Services;
+﻿using Synctool.Data;
+using Synctool.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class DashboardView : UserControl
     {

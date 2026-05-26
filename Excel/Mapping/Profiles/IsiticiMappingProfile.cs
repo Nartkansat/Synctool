@@ -1,6 +1,6 @@
-using ArcelikApp.Models;
+﻿using Synctool.Models;
 
-namespace ArcelikApp.Excel.Mapping.Profiles
+namespace Synctool.Excel.Mapping.Profiles
 {
     /// <summary>
     /// Isıtıcı Aletler (Termosifon, Soba vb.) Excel dosyası kolon mapping profili.

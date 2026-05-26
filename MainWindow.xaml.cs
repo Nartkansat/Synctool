@@ -1,18 +1,18 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-using ArcelikExcelApp.Views;
-using ArcelikApp.Services;
-using ArcelikExcelApp.Services;
-using ArcelikExcelApp.Models;
+using Synctool.Views;
+using Synctool.Services;
+using Synctool.Services;
+using Synctool.Models;
 using System.Collections.ObjectModel;
 using MaterialDesignThemes.Wpf;
 
-namespace ArcelikExcelApp
+namespace Synctool
 {
     public partial class MainWindow : Window
     {
@@ -258,7 +258,7 @@ namespace ArcelikExcelApp
                 
                 _ = Task.Run(() =>
                 {
-                    using var db = new ArcelikApp.Data.AppDbContext();
+                    using var db = new Synctool.Data.AppDbContext();
                     var notification = db.Notifications.Find(id);
                     if (notification != null)
                     {
@@ -451,6 +451,18 @@ namespace ArcelikExcelApp
                     case "Notifications":
                         SetPageHeader("Tüm Bildirimler", "Sistem bildirimleri ve duyurular", PackIconKind.BellRing, "#F59E0B", "#FFFBEB");
                         MainContentControl.Content = new NotificationsView();
+                        break;
+                    case "KampanyaBilgi":
+                        SetPageHeader("Kampanya Bilgi", "Kampanya detayları ve bilgilendirmeler", PackIconKind.InformationOutline, "#0891B2", "#ECFEFF");
+                        MainContentControl.Content = new KampanyaBilgiView();
+                        break;
+                    case "KampanyaDegisim":
+                        SetPageHeader("Kampanya Değişim", "İki Excel listesi arasındaki fiyat değişimlerini analiz et", PackIconKind.FileReplaceOutline, "#7C3AED", "#F5F3FF");
+                        MainContentControl.Content = new KampanyaDegisimView();
+                        break;
+                    case "StokMaliyet":
+                        SetPageHeader("Stok Maliyet Analizi", "Excel dosyası üzerinden stok maliyetlerini hesaplayın", PackIconKind.FilePercent, "#0EA5E9", "#F0F9FF");
+                        MainContentControl.Content = new StokMaliyetView();
                         break;
                 }
         }

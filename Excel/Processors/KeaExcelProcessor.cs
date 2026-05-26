@@ -1,12 +1,12 @@
-using ArcelikApp.Excel.Mapping;
-using ArcelikApp.Models;
+﻿using Synctool.Excel.Mapping;
+using Synctool.Models;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace ArcelikApp.Excel.Processors
+namespace Synctool.Excel.Processors
 {
     public class KeaExcelProcessor
     {

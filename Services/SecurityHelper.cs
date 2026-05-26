@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public static class SecurityHelper
     {

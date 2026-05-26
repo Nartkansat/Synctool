@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using AutoUpdaterDotNET;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public static class UpdateService
     {
         // GitHub deponuz Public olduğu için direkt raw URL kullanıyoruz.
-        private const string UpdateXmlUrl = "https://raw.githubusercontent.com/nartkansat/ArcelikApp/main/update.xml";
+        private const string UpdateXmlUrl = "https://raw.githubusercontent.com/nartkansat/Synctool/main/update.xml";
 
         public static void CheckForUpdates()
         {

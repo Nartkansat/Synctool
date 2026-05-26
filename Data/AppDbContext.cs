@@ -1,10 +1,9 @@
-using ArcelikApp.Models;
+using Synctool.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace ArcelikApp.Data
+namespace Synctool.Data
 {
     public class AppDbContext : DbContext
     {
@@ -24,6 +23,7 @@ namespace ArcelikApp.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Agreement> Agreements { get; set; }
         public DbSet<UserConsent> UserConsents { get; set; }
+        public DbSet<UserGuide> UserGuides { get; set; }
 
         /// <summary>
         /// Son bağlantı durumunu tutar. True = bağlı, False = bağlantı yok.
@@ -65,25 +65,18 @@ namespace ArcelikApp.Data
         {
             for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                Debug.WriteLine($"Veritabanı bağlantı denemesi {attempt}/{maxRetries}...");
-
                 bool connected = await Task.Run(() => TestConnection());
                 if (connected)
-                {
-                    Debug.WriteLine("Veritabanı bağlantısı başarılı.");
                     return true;
-                }
 
                 if (attempt < maxRetries)
                 {
                     // Exponential backoff: 2s, 4s, 8s...
                     int delayMs = (int)Math.Pow(2, attempt) * 1000;
-                    Debug.WriteLine($"Bağlantı başarısız, {delayMs / 1000} saniye sonra tekrar denenecek...");
                     await Task.Delay(delayMs);
                 }
             }
 
-            Debug.WriteLine("Tüm bağlantı denemeleri başarısız oldu.");
             return false;
         }
 
@@ -143,7 +136,6 @@ namespace ArcelikApp.Data
                 {
                     lastException = ex;
                     int delayMs = (int)Math.Pow(2, attempt) * 1000;
-                    Debug.WriteLine($"DB işlemi başarısız (deneme {attempt}/{maxRetries}): {ex.Message}. {delayMs / 1000}s sonra tekrar deneniyor...");
                     await Task.Delay(delayMs);
                 }
                 catch (Exception ex)

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ArcelikExcelApp.Migrations
+namespace Synctool.Migrations
 {
     /// <inheritdoc />
     public partial class AddFileDataToUploadedFiles : Migration

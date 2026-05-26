@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ArcelikApp.Models
+namespace Synctool.Models
 {
     public class ManualCampaign
     {

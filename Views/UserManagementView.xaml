@@ -1,8 +1,8 @@
-<UserControl x:Class="ArcelikExcelApp.Views.UserManagementView"
+﻿<UserControl x:Class="Synctool.Views.UserManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:converters="clr-namespace:ArcelikExcelApp.Converters"
+             xmlns:converters="clr-namespace:Synctool.Converters"
              Background="#F4F6F8" Loaded="UserControl_Loaded">
     <UserControl.Resources>
         <converters:RoleToColorConverter x:Key="RoleToColorConverter"/>
@@ -251,88 +251,199 @@
                 </Border.Effect>
             </Border>
             <Grid Background="#22FFFFFF">
-            <materialDesign:Card Width="440" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                UniformCornerRadius="25" Background="White">
-                <materialDesign:Card.Effect>
-                    <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.2" Direction="270" ShadowDepth="10"/>
-                </materialDesign:Card.Effect>
-                <Border Padding="35">
-                    <StackPanel>
-                        <Border Width="60" Height="60" Background="#FFEAEA" CornerRadius="30" Margin="0,0,0,20">
-                            <materialDesign:PackIcon Kind="AccountPlus" Width="30" Height="30" Foreground="#E02020" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock Text="Yeni Kullanıcı Ekle" FontSize="22" FontWeight="Bold" 
-                                   Foreground="#1A1A24" Margin="0,0,0,6" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Kullanıcı bilgilerini ve erişim yetkisini belirleyin" FontSize="13" 
-                                   Foreground="#7E84A3" Margin="0,0,0,25" HorizontalAlignment="Center"/>
-                        
-                        <TextBox x:Name="TxtNewUsername" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="Kullanıcı Adı" Margin="0,0,0,12"
-                                 materialDesign:TextFieldAssist.HasClearButton="True"/>
+                <materialDesign:Card Width="680" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                    UniformCornerRadius="25" Background="White">
+                    <materialDesign:Card.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.15" Direction="270" ShadowDepth="10"/>
+                    </materialDesign:Card.Effect>
+                    <Border Padding="40">
+                        <StackPanel>
+                            <!-- Header Icon and Title -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,24" HorizontalAlignment="Left">
+                                <Border Width="50" Height="50" Background="#FFEAEA" CornerRadius="16" Margin="0,0,16,0">
+                                    <materialDesign:PackIcon Kind="AccountPlusOutline" Width="26" Height="26" Foreground="#E02020" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Yeni Kullanıcı Ekle" FontSize="22" FontWeight="Bold" Foreground="#1A1A24"/>
+                                    <TextBlock Text="Sistem erişimi için yeni bir kullanıcı profilini tanımlayın" FontSize="13" Foreground="#7E84A3" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
 
-                        <TextBox x:Name="TxtNewEmail" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="E-Posta Adresi" Margin="0,0,0,12"
-                                 materialDesign:TextFieldAssist.HasClearButton="True"/>
+                            <Rectangle Height="1" Fill="#F1F5F9" Margin="0,0,0,24"/>
 
-                        <TextBox x:Name="TxtNewDealerName" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="Bayi Adı" Margin="0,0,0,12"
-                                 materialDesign:TextFieldAssist.HasClearButton="True"/>
+                            <!-- Row 1: Kullanıcı Adı & E-Posta Adresi (2 Columns) -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <materialDesign:PackIcon Kind="AccountOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Kullanıcı Adı" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBox x:Name="TxtNewUsername" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             materialDesign:HintAssist.Hint="Örn: admin" Height="48"
+                                             materialDesign:TextFieldAssist.HasClearButton="True"/>
+                                </StackPanel>
 
-                        <Grid Margin="0,0,0,12" Height="56">
-                            <PasswordBox x:Name="TxtNewPassword" Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
-                                         materialDesign:HintAssist.Hint="Şifre"
-                                         Padding="16,0,45,0" VerticalContentAlignment="Center" Height="56"/>
-                            <TextBox x:Name="TxtNewPasswordVisible" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     materialDesign:HintAssist.Hint="Şifre"
-                                     Visibility="Collapsed" Padding="16,0,45,0" VerticalContentAlignment="Center" Height="56"/>
-                            <Button Style="{StaticResource MaterialDesignIconButton}" Focusable="False"
-                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
-                                    Width="30" Height="30" Click="BtnAddShowPassword_Click">
-                                <materialDesign:PackIcon x:Name="IconAddShowPassword" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
-                            </Button>
-                        </Grid>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <materialDesign:PackIcon Kind="EmailOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="E-Posta Adresi" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBox x:Name="TxtNewEmail" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             materialDesign:HintAssist.Hint="ornek@arcelik.com" Height="48"
+                                             materialDesign:TextFieldAssist.HasClearButton="True"/>
+                                </StackPanel>
+                            </Grid>
 
-                        <Grid Margin="0,0,0,12" Height="56">
-                            <PasswordBox x:Name="TxtNewPasswordConfirm" Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
-                                         materialDesign:HintAssist.Hint="Şifre (Tekrar)"
-                                         Padding="16,0,45,0" VerticalContentAlignment="Center" Height="56"/>
-                            <TextBox x:Name="TxtNewPasswordConfirmVisible" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     materialDesign:HintAssist.Hint="Şifre (Tekrar)"
-                                     Visibility="Collapsed" Padding="16,0,45,0" VerticalContentAlignment="Center" Height="56"/>
-                            <Button Style="{StaticResource MaterialDesignIconButton}" Focusable="False"
-                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
-                                    Width="30" Height="30" Click="BtnAddShowPasswordConfirm_Click">
-                                <materialDesign:PackIcon x:Name="IconAddShowPasswordConfirm" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
-                            </Button>
-                        </Grid>
+                            <!-- Row 2: Bayi Adı & Yetki Rolü (2 Columns) -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <materialDesign:PackIcon Kind="StorefrontOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Bayi Adı" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBox x:Name="TxtNewDealerName" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             materialDesign:HintAssist.Hint="Örn: Merkez Bayi" Height="48"
+                                             materialDesign:TextFieldAssist.HasClearButton="True"/>
+                                </StackPanel>
 
-                        <ComboBox x:Name="CmbRole" Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                  materialDesign:HintAssist.Hint="Yetki Rolü" Margin="0,0,0,12">
-                            <ComboBoxItem Content="User" IsSelected="True"/>
-                            <ComboBoxItem Content="Admin"/>
-                        </ComboBox>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <materialDesign:PackIcon Kind="ShieldAccountOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Yetki Rolü" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <ComboBox x:Name="CmbRole" Style="{StaticResource MaterialDesignOutlinedComboBox}" Height="48">
+                                        <ComboBoxItem Content="User" IsSelected="True"/>
+                                        <ComboBoxItem Content="Admin"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
 
-                        <TextBox x:Name="TxtNewLicenseKey" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="Lisans Anahtarı (Otomatik)" Margin="0,0,0,10" 
-                                 IsReadOnly="True" Foreground="#7E84A3"/>
-                        
-                        <TextBlock x:Name="TxtUserError" Foreground="#D32F2F" FontSize="13" Margin="0,0,0,15" 
-                                 HorizontalAlignment="Left" Visibility="Collapsed" TextWrapping="Wrap"/>
-                        
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="1.5*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Vazgeç" Style="{StaticResource MaterialDesignFlatButton}" 
-                                    Click="BtnCancel_Click" Foreground="#7E84A3" Height="48"/>
-                            <Button Grid.Column="1" Content="Kaydet ve Kapat" Foreground="White" Background="#E02020" BorderBrush="#E02020" 
-                                    materialDesign:ButtonAssist.CornerRadius="14" Height="48" FontWeight="SemiBold"
-                                    Click="BtnSaveUser_Click"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-            </materialDesign:Card>
+                            <!-- Row 3: Şifre & Şifre (Tekrar) (2 Columns) -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <materialDesign:PackIcon Kind="LockOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Şifre" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Height="48">
+                                        <PasswordBox x:Name="TxtNewPassword" Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                                     materialDesign:HintAssist.Hint="Şifrenizi belirleyin"
+                                                     Padding="16,0,45,0" VerticalContentAlignment="Center" Height="48"
+                                                     PasswordChanged="TxtNewPassword_PasswordChanged"/>
+                                        <TextBox x:Name="TxtNewPasswordVisible" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:HintAssist.Hint="Şifrenizi belirleyin"
+                                                 Visibility="Collapsed" Padding="16,0,45,0" VerticalContentAlignment="Center" Height="48"
+                                                 TextChanged="TxtNewPasswordVisible_TextChanged"/>
+                                        <Button Style="{StaticResource MaterialDesignIconButton}" Focusable="False"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                                                Width="30" Height="30" Click="BtnAddShowPassword_Click">
+                                            <materialDesign:PackIcon x:Name="IconAddShowPassword" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <materialDesign:PackIcon Kind="LockCheckOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Şifre (Tekrar)" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Height="48">
+                                        <PasswordBox x:Name="TxtNewPasswordConfirm" Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                                     materialDesign:HintAssist.Hint="Şifreyi tekrar girin"
+                                                     Padding="16,0,45,0" VerticalContentAlignment="Center" Height="48"/>
+                                        <TextBox x:Name="TxtNewPasswordConfirmVisible" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:HintAssist.Hint="Şifreyi tekrar girin"
+                                                 Visibility="Collapsed" Padding="16,0,45,0" VerticalContentAlignment="Center" Height="48"/>
+                                        <Button Style="{StaticResource MaterialDesignIconButton}" Focusable="False"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                                                Width="30" Height="30" Click="BtnAddShowPasswordConfirm_Click">
+                                            <materialDesign:PackIcon x:Name="IconAddShowPasswordConfirm" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Password Strength Validator Panel -->
+                            <Border x:Name="PassValidatorPanel" Background="#F8FAFC" CornerRadius="16" BorderThickness="1" BorderBrush="#E2E8F0" Padding="16,12" Margin="0,0,0,20">
+                                <StackPanel>
+                                    <TextBlock Text="Şifre Güvenlik Standartları" FontSize="13" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,8"/>
+                                    <UniformGrid Columns="2">
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <materialDesign:PackIcon x:Name="IconNewLength" Kind="CircleOutline" Width="16" Height="16" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtNewLength" Text="En az 8 karakter" FontSize="12" Foreground="#64748B" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <materialDesign:PackIcon x:Name="IconNewUpper" Kind="CircleOutline" Width="16" Height="16" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtNewUpper" Text="En az 1 büyük harf" FontSize="12" Foreground="#64748B" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <materialDesign:PackIcon x:Name="IconNewLower" Kind="CircleOutline" Width="16" Height="16" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtNewLower" Text="En az 1 küçük harf" FontSize="12" Foreground="#64748B" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4">
+                                            <materialDesign:PackIcon x:Name="IconNewSymbol" Kind="CircleOutline" Width="16" Height="16" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtNewSymbol" Text="En az 1 sembol" FontSize="12" Foreground="#64748B" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+
+
+                            <!-- Row 4: Lisans Anahtarı -->
+                            <StackPanel Margin="0,0,0,24">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <materialDesign:PackIcon Kind="KeyOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Lisans Anahtarı" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBox x:Name="TxtNewLicenseKey" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="Kaydedildiğinde otomatik oluşturulacaktır" Margin="0,0,0,0" 
+                                         IsReadOnly="True" Foreground="#64748B" Height="48" Background="#F8FAFC"/>
+                            </StackPanel>
+                            
+                            <TextBlock x:Name="TxtUserError" Foreground="#D32F2F" FontSize="13" Margin="0,0,0,20" 
+                                     HorizontalAlignment="Left" Visibility="Collapsed" TextWrapping="Wrap"/>
+                            
+                            <!-- Footer Buttons -->
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="1.5*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                        Click="BtnCancel_Click" Foreground="#7E84A3" BorderBrush="#CBD5E1" 
+                                        materialDesign:ButtonAssist.CornerRadius="12" Height="48" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Vazgeç" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="1" Foreground="White" Background="#E02020" BorderBrush="#E02020" 
+                                        materialDesign:ButtonAssist.CornerRadius="12" Height="48" FontWeight="Bold"
+                                        Click="BtnSaveUser_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="ContentSaveOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Kaydet ve Kapat" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </materialDesign:Card>
             </Grid>
         </Grid>
 
@@ -344,44 +455,66 @@
                 </Border.Effect>
             </Border>
             <Grid Background="#22FFFFFF">
-            <materialDesign:Card Width="380" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                UniformCornerRadius="25" Background="White">
-                <materialDesign:Card.Effect>
-                    <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.2" Direction="270" ShadowDepth="10"/>
-                </materialDesign:Card.Effect>
-                <Border Padding="35">
-                    <StackPanel>
-                        <Border Width="60" Height="60" Background="#E8EAF6" CornerRadius="30" Margin="0,0,0,20">
-                            <materialDesign:PackIcon Kind="ShieldAccountOutline" Width="30" Height="30" Foreground="#3949AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock Text="Yetki Düzenle" FontSize="22" FontWeight="Bold" 
-                                   Foreground="#1A1A24" Margin="0,0,0,6" HorizontalAlignment="Center"/>
-                        <TextBlock x:Name="TxtEditUserSubtitle" Text="" FontSize="13" 
-                                   Foreground="#7E84A3" Margin="0,0,0,25" HorizontalAlignment="Center"/>
+                <materialDesign:Card Width="400" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                    UniformCornerRadius="25" Background="White">
+                    <materialDesign:Card.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.2" Direction="270" ShadowDepth="10"/>
+                    </materialDesign:Card.Effect>
+                    <Border Padding="35">
+                        <StackPanel>
+                            <!-- Header Icon and Title -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,24" HorizontalAlignment="Center">
+                                <Border Width="50" Height="50" Background="#EEF2FF" CornerRadius="16" Margin="0,0,16,0">
+                                    <materialDesign:PackIcon Kind="ShieldAccountOutline" Width="26" Height="26" Foreground="#3949AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Yetki Düzenle" FontSize="20" FontWeight="Bold" Foreground="#1A1A24"/>
+                                    <TextBlock x:Name="TxtEditUserSubtitle" Text="" FontSize="13" Foreground="#7E84A3" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
 
-                        <ComboBox x:Name="CmbEditRole" Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                  materialDesign:HintAssist.Hint="Yetki Rolü" Margin="0,0,0,15">
-                            <ComboBoxItem Content="User" IsSelected="True"/>
-                            <ComboBoxItem Content="Admin"/>
-                        </ComboBox>
+                            <Rectangle Height="1" Fill="#F1F5F9" Margin="0,0,0,20"/>
 
-                        <TextBlock x:Name="TxtEditUserError" Foreground="#D32F2F" FontSize="13" Margin="0,0,0,15" 
-                                 HorizontalAlignment="Left" Visibility="Collapsed" TextWrapping="Wrap"/>
+                            <StackPanel Margin="0,0,0,20">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <materialDesign:PackIcon Kind="ShieldAccountOutline" Width="18" Height="18" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Yetki Rolü" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <ComboBox x:Name="CmbEditRole" Style="{StaticResource MaterialDesignOutlinedComboBox}" Height="48">
+                                    <ComboBoxItem Content="User" IsSelected="True"/>
+                                    <ComboBoxItem Content="Admin"/>
+                                </ComboBox>
+                            </StackPanel>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="1.5*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Vazgeç" Style="{StaticResource MaterialDesignFlatButton}" 
-                                    Click="BtnCancelEdit_Click" Foreground="#7E84A3" Height="48"/>
-                            <Button Grid.Column="1" Content="Kaydet" Foreground="White" Background="#3949AB" BorderBrush="#3949AB" 
-                                    materialDesign:ButtonAssist.CornerRadius="14" Height="48" FontWeight="SemiBold"
-                                    Click="BtnSaveEditUser_Click"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-            </materialDesign:Card>
+                            <TextBlock x:Name="TxtEditUserError" Foreground="#D32F2F" FontSize="13" Margin="0,0,0,15" 
+                                     HorizontalAlignment="Left" Visibility="Collapsed" TextWrapping="Wrap"/>
+
+                            <!-- Footer Buttons -->
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="1.5*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                        Click="BtnCancelEdit_Click" Foreground="#7E84A3" BorderBrush="#CBD5E1" 
+                                        materialDesign:ButtonAssist.CornerRadius="12" Height="48" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Vazgeç" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="1" Foreground="White" Background="#3949AB" BorderBrush="#3949AB" 
+                                        materialDesign:ButtonAssist.CornerRadius="12" Height="48" FontWeight="Bold"
+                                        Click="BtnSaveEditUser_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="ContentSaveOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Kaydet" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </materialDesign:Card>
             </Grid>
         </Grid>
 
@@ -393,54 +526,81 @@
                 </Border.Effect>
             </Border>
             <Grid Background="#22FFFFFF">
-                <materialDesign:Card Width="450" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                <materialDesign:Card Width="540" VerticalAlignment="Center" HorizontalAlignment="Center" 
                                     UniformCornerRadius="25" Background="White">
                     <materialDesign:Card.Effect>
-                        <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.2" Direction="270" ShadowDepth="10"/>
+                        <DropShadowEffect Color="Black" BlurRadius="40" Opacity="0.15" Direction="270" ShadowDepth="10"/>
                     </materialDesign:Card.Effect>
                     <Border Padding="35">
                         <StackPanel>
-                            <Border Width="60" Height="60" Background="#E8EAF6" CornerRadius="30" Margin="0,0,0,20">
-                                <materialDesign:PackIcon Kind="BellRingOutline" Width="30" Height="30" Foreground="#3949AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            
-                            <TextBlock Text="Bildirim Oluştur" FontSize="22" FontWeight="Bold" 
-                                       Foreground="#1A1A24" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Kullanıcılara anlık mesaj gönderin" FontSize="13" 
-                                       Foreground="#7E84A3" Margin="0,5,0,30" HorizontalAlignment="Center"/>
-                            
-                            <ComboBox x:Name="CmbNotifyUser" Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                      materialDesign:HintAssist.Hint="Alıcı" Margin="0,0,0,15">
-                                <ComboBoxItem Content="Tüm Kullanıcılar" IsSelected="True" Tag="All"/>
-                            </ComboBox>
-                            
-                            <TextBox x:Name="TxtNotifyTitle" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     materialDesign:HintAssist.Hint="Bildirim Başlığı" Margin="0,0,0,15"/>
-                            
-                            <TextBox x:Name="TxtNotifyMessage" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     materialDesign:HintAssist.Hint="Mesaj İçeriği" Margin="0,0,0,15"
-                                     AcceptsReturn="True" Height="100" VerticalContentAlignment="Top" Padding="15"/>
-                            
-                            <ComboBox x:Name="CmbNotifyType" Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                      materialDesign:HintAssist.Hint="Bildirim Tipi" Margin="0,0,0,20">
-                                <ComboBoxItem Content="Bilgi (Info)" Tag="Info" IsSelected="True"/>
-                                <ComboBoxItem Content="Başarı (Success)" Tag="Success"/>
-                                <ComboBoxItem Content="Uyarı (Warning)" Tag="Warning"/>
-                                <ComboBoxItem Content="Hata (Error)" Tag="Error"/>
-                            </ComboBox>
+                            <!-- Header Icon and Title -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,24" HorizontalAlignment="Left">
+                                <Border Width="50" Height="50" Background="#EEF2FF" CornerRadius="16" Margin="0,0,16,0">
+                                    <materialDesign:PackIcon Kind="BellRingOutline" Width="26" Height="26" Foreground="#3949AB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Yeni Bildirim Gönder" FontSize="20" FontWeight="Bold" Foreground="#1A1A24"/>
+                                    <TextBlock Text="Kullanıcılara anlık mesaj veya duyuru yayınlayın" FontSize="13" Foreground="#7E84A3" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Rectangle Height="1" Fill="#F1F5F9" Margin="0,0,0,20"/>
+
+                            <!-- Row 1: Alıcı & Bildirim Tipi (2 Columns) -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                    <TextBlock Text="Alıcı" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,8"/>
+                                    <ComboBox x:Name="CmbNotifyUser" Style="{StaticResource MaterialDesignOutlinedComboBox}" Height="48">
+                                        <ComboBoxItem Content="Tüm Kullanıcılar" IsSelected="True" Tag="All"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock Text="Bildirim Tipi" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,8"/>
+                                    <ComboBox x:Name="CmbNotifyType" Style="{StaticResource MaterialDesignOutlinedComboBox}" Height="48">
+                                        <ComboBoxItem Content="Bilgi (Info)" Tag="Info" IsSelected="True"/>
+                                        <ComboBoxItem Content="Başarı (Success)" Tag="Success"/>
+                                        <ComboBoxItem Content="Uyarı (Warning)" Tag="Warning"/>
+                                        <ComboBoxItem Content="Hata (Error)" Tag="Error"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Row 2: Başlık -->
+                            <StackPanel Margin="0,0,0,20">
+                                <TextBlock Text="Bildirim Başlığı" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,8"/>
+                                <TextBox x:Name="TxtNotifyTitle" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="Kısa ve açıklayıcı bir başlık yazın..." Height="48"
+                                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+                            </StackPanel>
+
+                            <!-- Row 3: Mesaj İçeriği -->
+                            <StackPanel Margin="0,0,0,20">
+                                <TextBlock Text="Mesaj İçeriği" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,8"/>
+                                <TextBox x:Name="TxtNotifyMessage" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="Kullanıcılara iletilecek mesaj detaylarını buraya yazın..."
+                                         AcceptsReturn="True" Height="120" VerticalContentAlignment="Top" Padding="16,12" TextWrapping="Wrap"/>
+                            </StackPanel>
 
                             <TextBlock x:Name="TxtNotifyError" Foreground="#D32F2F" FontSize="13" Margin="0,0,0,20" 
                                      HorizontalAlignment="Left" Visibility="Collapsed" TextWrapping="Wrap"/>
-                            
-                            <Grid>
+
+                            <!-- Footer Buttons -->
+                            <Grid Margin="0,8,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="1.5*"/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="İptal" Style="{StaticResource MaterialDesignFlatButton}" 
-                                        Click="BtnCancelNotify_Click" Foreground="#7E84A3" Height="48"/>
+                                <Button Grid.Column="0" Content="Vazgeç" Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                        Click="BtnCancelNotify_Click" Foreground="#7E84A3" BorderBrush="#CBD5E1" 
+                                        materialDesign:ButtonAssist.CornerRadius="12" Height="48" Margin="0,0,12,0"/>
                                 <Button Grid.Column="1" Content="Bildirimi Yayınla" Foreground="White" Background="#3949AB" BorderBrush="#3949AB" 
-                                        materialDesign:ButtonAssist.CornerRadius="14" Height="48" FontWeight="SemiBold"
+                                        materialDesign:ButtonAssist.CornerRadius="12" Height="48" FontWeight="Bold"
                                         Click="BtnSendNotification_Click"/>
                             </Grid>
                         </StackPanel>

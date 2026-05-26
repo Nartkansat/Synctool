@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ArcelikExcelApp.Migrations
+namespace Synctool.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMySqlCreate : Migration

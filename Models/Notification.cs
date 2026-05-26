@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace ArcelikApp.Models
+namespace Synctool.Models
 {
     public class Notification
     {

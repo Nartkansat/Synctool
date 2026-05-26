@@ -1,6 +1,6 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
-using ArcelikApp.Services;
+﻿using Synctool.Data;
+using Synctool.Models;
+using Synctool.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,11 +11,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using ArcelikExcelApp.Models;
-using ArcelikExcelApp.Services;
+using Synctool.Models;
+using Synctool.Services;
 using MaterialDesignThemes.Wpf;
+using Microsoft.EntityFrameworkCore;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class BeyazEsyaView : UserControl
     {
@@ -44,8 +45,19 @@ namespace ArcelikExcelApp.Views
 
         public class CalculationDisplayItem : CostCalculation
         {
+            public string ExcelFileType { get; set; } = string.Empty;
             public string ManualCampaignText { get; set; } = string.Empty;
             public bool HasManualCampaign => !string.IsNullOrEmpty(ManualCampaignText);
+
+            public decimal CashPrice { get; set; }
+            public decimal WholesalePrice30 { get; set; }
+            public decimal WholesalePrice60 { get; set; }
+            public decimal WholesalePrice90 { get; set; }
+            public decimal WholesalePrice120 { get; set; }
+            public decimal OriginalPricePP { get; set; }
+            public decimal OriginalPurchasePrice { get; set; }
+            public string ActiveValorText { get; set; } = string.Empty;
+            public decimal DiscountAmount { get; set; }
         }
 
 
@@ -85,16 +97,6 @@ namespace ArcelikExcelApp.Views
         public BeyazEsyaView()
         {
             InitializeComponent();
-
-            if (AuthService.CurrentUser != null)
-            {
-              
-                // Admin değilse admin bölümünü gizle
-                if (AuthService.CurrentUser.Role != "Admin")
-                {
-                    BtnOpenValorSettings.Visibility = Visibility.Collapsed;
-                }
-            }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -109,7 +111,23 @@ namespace ArcelikExcelApp.Views
             await EnsureCacheAsync();
             if (_cache.Count > 0)
                 ColCardPrice.Header = $"Kart Fiyat\u0131 (%{Convert.ToInt32(_cache[0].CardMarkupPercent)})";
+            ApplyValorFilter();
             FilterAndDisplay(_currentSearchQuery);
+
+            // Initialize valor rows once
+            _valorRows = ValorSettingsService.WhiteGoodsCategories
+                .Select(cat =>
+                {
+                    var savedValor = ValorSettingsService.GetValor(cat);
+                    return new ValorSettingRow
+                    {
+                        CategoryName     = cat,
+                        OriginalValorKey = savedValor,
+                        SelectedValorKey = savedValor
+                    };
+                })
+                .ToList();
+            IcValorSettings.ItemsSource = _valorRows;
         }
 
         // Önbelleği doldurur — sadece boşsa veya süresi dolmuşsa DB'ye gider
@@ -138,22 +156,79 @@ namespace ArcelikExcelApp.Views
                             g => string.Join("\n\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n", g.Select(x => x.Description))
                         );
 
-                    return calcs.Select(c => new CalculationDisplayItem
+                    var olizCampaigns = db.OlizCampaigns
+                        .Where(oc => productCodes.Contains(oc.ProductCode))
+                        .Select(oc => new { oc.ProductCode, oc.DiscountAmount, oc.Id })
+                        .AsNoTracking()
+                        .ToList()
+                        .GroupBy(oc => oc.ProductCode)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.OrderByDescending(oc => oc.Id).First().DiscountAmount,
+                            StringComparer.OrdinalIgnoreCase
+                        );
+
+                    var wgProducts = db.WhiteGoodsProducts
+                        .Where(p => productCodes.Contains(p.ProductCode))
+                        .Select(p => new {
+                            p.ProductCode,
+                            p.ExcelFileType,
+                            CashPrice = p.CashPrice ?? 0,
+                            WholesalePrice30 = p.WholesalePrice30 ?? 0,
+                            WholesalePrice60 = p.WholesalePrice60 ?? 0,
+                            WholesalePrice90 = p.WholesalePrice90 ?? 0,
+                            WholesalePrice120 = p.WholesalePrice120 ?? 0
+                        })
+                        .AsNoTracking()
+                        .ToList();
+
+                    var wgDict = wgProducts
+                        .Where(x => !string.IsNullOrEmpty(x.ProductCode))
+                        .GroupBy(x => x.ProductCode.Trim())
+                        .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+                    return calcs.Select(c =>
                     {
-                        Id = c.Id,
-                        ProductId = c.ProductId,
-                        ProductCode = c.ProductCode,
-                        ProductName = c.ProductName,
-                        SourceTable = c.SourceTable,
-                        PricePP = c.PricePP,
-                        PricePPSource = c.PricePPSource,
-                        PriceConversion = c.PriceConversion,
-                        PurchasePrice = c.PurchasePrice,
-                        CardMarkupPercent = c.CardMarkupPercent,
-                        CardPurchasePrice = c.CardPurchasePrice,
-                        CampaingDate = c.CampaingDate,
-                        CreatedDate = c.CreatedDate,
-                        ManualCampaignText = campaigns.TryGetValue(c.ProductCode, out var txt) ? txt : string.Empty
+                        decimal cash = 0, w30 = 0, w60 = 0, w90 = 0, w120 = 0;
+                        string excelFileType = string.Empty;
+                        string key = c.ProductCode?.Trim() ?? string.Empty;
+                        if (wgDict.TryGetValue(key, out var wg))
+                        {
+                            cash = wg.CashPrice;
+                            w30 = wg.WholesalePrice30;
+                            w60 = wg.WholesalePrice60;
+                            w90 = wg.WholesalePrice90;
+                            w120 = wg.WholesalePrice120;
+                            excelFileType = wg.ExcelFileType;
+                        }
+
+                        return new CalculationDisplayItem
+                        {
+                            Id = c.Id,
+                            ProductId = c.ProductId,
+                            ProductCode = c.ProductCode,
+                            ProductName = c.ProductName,
+                            SourceTable = c.SourceTable,
+                            PricePP = c.PricePP,
+                            PricePPSource = c.PricePPSource,
+                            PriceConversion = c.PriceConversion,
+                            PurchasePrice = c.PurchasePrice,
+                            CardMarkupPercent = c.CardMarkupPercent,
+                            CardPurchasePrice = c.CardPurchasePrice,
+                            CampaingDate = c.CampaingDate,
+                            CreatedDate = c.CreatedDate,
+                            ManualCampaignText = campaigns.TryGetValue(c.ProductCode, out var txt) ? txt : string.Empty,
+                            DiscountAmount = olizCampaigns.TryGetValue(c.ProductCode, out var disc) ? disc : 0m,
+
+                            CashPrice = cash,
+                            WholesalePrice30 = w30,
+                            WholesalePrice60 = w60,
+                            WholesalePrice90 = w90,
+                            WholesalePrice120 = w120,
+                            OriginalPricePP = c.PricePP,
+                            OriginalPurchasePrice = c.PurchasePrice,
+                            ExcelFileType = excelFileType
+                        };
                     }).ToList();
                 });
                 _cacheTime = DateTime.Now;
@@ -191,7 +266,7 @@ namespace ArcelikExcelApp.Views
                 );
             }
 
-            _filteredData = result;
+            _filteredData = result.OrderByDescending(c => c.PricePP).ToList();
             _totalCount = _filteredData.Count;
             _totalPages = (int)Math.Ceiling((double)_totalCount / _pageSize);
             if (_totalPages == 0) _totalPages = 1;
@@ -208,6 +283,7 @@ namespace ArcelikExcelApp.Views
                 .Cast<CostCalculation>()
                 .ToList();
             GridBeyazEsya.ItemsSource = pagedData;
+            GridBeyazEsya.Items.Refresh();
             TxtTotalCount.Text = $"Toplam: {_totalCount} \u00dcr\u00fcn";
             TxtPageInfo.Text = $"Sayfa {_currentPage} / {_totalPages}";
             BtnPrev.IsEnabled = _currentPage > 1;
@@ -227,6 +303,61 @@ namespace ArcelikExcelApp.Views
                 if (t.IsCanceled) return;
                 Dispatcher.Invoke(() => FilterAndDisplay(query));
             }, TaskScheduler.Default);
+        }
+
+        private void CboValorFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (GridBeyazEsya == null) return;
+            ApplyValorFilter();
+            FilterAndDisplay(_currentSearchQuery);
+        }
+
+        private void ApplyValorFilter()
+        {
+            if (CboValorFilter == null || _cache == null || !_cache.Any()) return;
+
+            var selectedItem = CboValorFilter.SelectedItem as ComboBoxItem;
+            if (selectedItem == null) return;
+
+            string valorKey = selectedItem.Tag?.ToString() ?? "Personal";
+            string headerText = selectedItem.Content?.ToString() ?? "Ayarlanan Valörler";
+            
+            if (ColBasePrice != null)
+            {
+                ColBasePrice.Header = "Baz Fiyat";
+            }
+
+            foreach (var item in _cache)
+            {
+                string targetValorKey = valorKey;
+                if (valorKey == "Personal")
+                {
+                    // Eğer ürünün kategorisi boş ise varsayılan WholesalePrice60 kullanılır
+                    string category = string.IsNullOrEmpty(item.ExcelFileType) ? item.ProductName : item.ExcelFileType;
+                    targetValorKey = ValorSettingsService.GetValor(category);
+                }
+
+                decimal basePrice = targetValorKey switch
+                {
+                    "CashPrice" => item.CashPrice,
+                    "WholesalePrice30" => item.WholesalePrice30,
+                    "WholesalePrice60" => item.WholesalePrice60,
+                    "WholesalePrice90" => item.WholesalePrice90,
+                    "WholesalePrice120" => item.WholesalePrice120,
+                    _ => item.OriginalPricePP
+                };
+
+                if (basePrice == 0 && item.OriginalPricePP > 0 && (targetValorKey == "WholesalePrice60" || item.CashPrice == 0))
+                {
+                    basePrice = item.OriginalPricePP;
+                }
+
+                item.PricePP = basePrice;
+                item.PurchasePrice = basePrice - item.PriceConversion;
+                if (item.PurchasePrice < 0) item.PurchasePrice = 0;
+                item.CardPurchasePrice = Math.Round(item.PurchasePrice * (1 + item.CardMarkupPercent / 100m), 2);
+                item.ActiveValorText = ValorSettingsService.ValorOptions.TryGetValue(targetValorKey, out var optName) ? optName : "60 Günlük";
+            }
         }
 
         private void BtnPrev_Click(object sender, RoutedEventArgs e)
@@ -517,21 +648,32 @@ namespace ArcelikExcelApp.Views
         // ── Valör Ayarları Panel ────────────────────────────────────────────────
         private void BtnOpenValorSettings_Click(object sender, RoutedEventArgs e)
         {
-            _valorRows = ValorSettingsService.WhiteGoodsCategories
-                .Select(cat =>
-                {
-                    var savedValor = ValorSettingsService.GetValor(cat);
-                    return new ValorSettingRow
+            if (_valorRows == null || !_valorRows.Any())
+            {
+                _valorRows = ValorSettingsService.WhiteGoodsCategories
+                    .Select(cat =>
                     {
-                        CategoryName     = cat,
-                        OriginalValorKey = savedValor,
-                        SelectedValorKey = savedValor
-                    };
-                })
-                .ToList();
+                        var savedValor = ValorSettingsService.GetValor(cat);
+                        return new ValorSettingRow
+                        {
+                            CategoryName     = cat,
+                            OriginalValorKey = savedValor,
+                            SelectedValorKey = savedValor
+                        };
+                    })
+                    .ToList();
+                IcValorSettings.ItemsSource = _valorRows;
+            }
+            else
+            {
+                foreach (var row in _valorRows)
+                {
+                    var savedValor = ValorSettingsService.GetValor(row.CategoryName);
+                    row.OriginalValorKey = savedValor;
+                    row.SelectedValorKey = savedValor;
+                }
+            }
 
-            IcValorSettings.ItemsSource = null;
-            IcValorSettings.ItemsSource = _valorRows;
             TxtValorSaved.Visibility = Visibility.Collapsed;
             ValorSettingsOverlay.Visibility = Visibility.Visible;
         }
@@ -543,7 +685,6 @@ namespace ArcelikExcelApp.Views
 
         private async void BtnSaveValorSettings_Click(object sender, RoutedEventArgs e)
         {
-            // Değişen kategorileri bul
             var changedRows = _valorRows.Where(r => r.HasChanged).ToList();
 
             // Yeni ayarları diske kaydet
@@ -559,98 +700,17 @@ namespace ArcelikExcelApp.Views
                 return;
             }
 
-            // Yükleniyor göstergesi
+            // Önbelleği temizlemeye veya veritabanından tekrar yüklemeye gerek yok,
+            // sadece yeni valör filtresini bellekteki verilere uygula.
+            ApplyValorFilter();
+            FilterAndDisplay(_currentSearchQuery);
+
             ValorSettingsOverlay.Visibility = Visibility.Collapsed;
-            OverlayLoading.Visibility = Visibility.Visible;
-
-            try
-            {
-                int totalUpdated = 0;
-
-                await Task.Run(() =>
-                {
-                    using var db = new AppDbContext();
-
-                    foreach (var row in changedRows)
-                    {
-                        string category  = row.CategoryName;
-                        string valorKey  = row.SelectedValorKey;
-
-                        // Bu kategorideki tüm WhiteGoodsProduct’ları al
-                        var wgProducts = db.WhiteGoodsProducts
-                            .Where(w => w.ExcelFileType == category)
-                            .ToList();
-
-                        if (!wgProducts.Any()) continue;
-
-                        var byId   = wgProducts.ToDictionary(w => w.Id.ToString());
-                        var byCode = wgProducts
-                            .GroupBy(w => w.ProductCode)
-                            .ToDictionary(g => g.Key, g => g.First());
-
-                        // Bu ürünlere ait CostCalculation kayıtlarını al
-                        var productIds   = byId.Keys.ToHashSet();
-                        var productCodes = byCode.Keys.ToHashSet();
-
-                        var calcs = db.CostCalculations
-                            .Where(c => c.SourceTable == "WhiteGoods" &&
-                                       (productIds.Contains(c.ProductId) ||
-                                        productCodes.Contains(c.ProductCode)))
-                            .ToList();
-
-                        foreach (var calc in calcs)
-                        {
-                            // WhiteGoodsProduct’ı bul
-                            WhiteGoodsProduct? wg = null;
-                            if (byId.TryGetValue(calc.ProductId, out var p1))   wg = p1;
-                            else if (byCode.TryGetValue(calc.ProductCode, out var p2)) wg = p2;
-                            if (wg == null) continue;
-
-                            decimal newPricePP = GetPriceFromValor(wg, valorKey);
-                            if (newPricePP == 0) continue; // Bu valör bu ürün için tanımlı değil
-
-                            calc.PricePPSource     = valorKey;
-                            calc.PricePP           = newPricePP;
-                            calc.PurchasePrice     = newPricePP - calc.PriceConversion;
-                            calc.CardPurchasePrice  = Math.Round(
-                                calc.PurchasePrice * (1 + calc.CardMarkupPercent / 100m), 2);
-
-                            totalUpdated++;
-                        }
-
-                        db.SaveChanges();
-                    }
-                });
-
-                // Ekranı yenile
-                _cache.Clear(); // Önbelleği sıfırla, yeni veriler yüklensin
-                await InitAsync();
-
-                await ModernDialogService.ShowAsync(
-                    "Maliyet Güncellendi",
-                    $"{changedRows.Count} kategori için toplam {totalUpdated} kayıt yeni valöre göre yeniden hesaplandı ve güncellendi.",
-                    ModernDialogType.Success);
-            }
-            catch (Exception ex)
-            {
-                await ModernDialogService.ShowAsync("Hata",
-                    $"Güncelleme sırasında hata oluştu:\n{ex.Message}", ModernDialogType.Error);
-            }
-            finally
-            {
-                OverlayLoading.Visibility = Visibility.Collapsed;
-            }
+            await ModernDialogService.ShowAsync(
+                "Maliyet Güncellendi",
+                "Valör ayarlarınız kaydedildi ve görünüm güncellendi.",
+                ModernDialogType.Success);
         }
-
-        private static decimal GetPriceFromValor(WhiteGoodsProduct wg, string valorKey) => valorKey switch
-        {
-            "WholesalePrice30"  => wg.WholesalePrice30  ?? 0m,
-            "WholesalePrice60"  => wg.WholesalePrice60  ?? 0m,
-            "WholesalePrice90"  => wg.WholesalePrice90  ?? 0m,
-            "WholesalePrice120" => wg.WholesalePrice120 ?? 0m,
-            "CashPrice"         => wg.CashPrice         ?? 0m,
-            _                   => wg.WholesalePrice60  ?? 0m
-        };
 
         // ── Eski Fiyatları Gör ─────────────────────────────────────────────
         private static readonly string[] _monthNames = {

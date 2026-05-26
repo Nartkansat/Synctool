@@ -1,4 +1,4 @@
-namespace ArcelikApp.Models
+﻿namespace Synctool.Models
 {
     /// <summary>
     /// Maliyet hesabı sonuçlarını tutan tablo.

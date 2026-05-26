@@ -1,6 +1,6 @@
-using ArcelikApp.Models;
+﻿using Synctool.Models;
 
-namespace ArcelikApp.Excel.Mapping.Profiles
+namespace Synctool.Excel.Mapping.Profiles
 {
     /// <summary>
     /// KEA Süpürge ve Ütü Excel dosyası kolon mapping profili.

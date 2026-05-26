@@ -1,11 +1,11 @@
-using ArcelikApp.Excel.Mapping;
-using ArcelikApp.Models;
+﻿using Synctool.Excel.Mapping;
+using Synctool.Models;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace ArcelikApp.Excel.Processors
+namespace Synctool.Excel.Processors
 {
     /// <summary>
     /// ColumnMappingProfile'a göre herhangi bir WhiteGoods Excel dosyasını okur.

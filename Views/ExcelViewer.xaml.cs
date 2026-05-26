@@ -1,5 +1,5 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
+﻿using Synctool.Data;
+using Synctool.Models;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
@@ -12,10 +12,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using ArcelikApp.Services;
+using Synctool.Services;
 
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class ExcelViewer : UserControl
     {

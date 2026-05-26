@@ -1,9 +1,9 @@
-using ArcelikApp.Services;
+﻿using Synctool.Services;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ArcelikExcelApp.Views
+namespace Synctool.Views
 {
     public partial class NotificationsView : UserControl
     {
@@ -65,7 +65,7 @@ namespace ArcelikExcelApp.Views
                 var notification = await Task.Run(() =>
                 {
                     NotificationService.MarkAsRead(id);
-                    using var db = new ArcelikApp.Data.AppDbContext();
+                    using var db = new Synctool.Data.AppDbContext();
                     return db.Notifications.Find(id);
                 });
                 

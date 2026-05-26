@@ -1,10 +1,10 @@
-using ArcelikApp.Data;
-using ArcelikApp.Models;
+using Synctool.Data;
+using Synctool.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-namespace ArcelikApp.Services
+namespace Synctool.Services
 {
     public class AuthService
     {
@@ -238,6 +238,29 @@ namespace ArcelikApp.Services
         public static void CreateInitialAdmin()
         {
             using var db = new AppDbContext();
+            
+            // Create UserGuides table if not exists and populate it
+            try
+            {
+                db.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS UserGuides (
+                        Id INT AUTO_INCREMENT PRIMARY KEY,
+                        Content LONGTEXT NOT NULL,
+                        UpdatedAt DATETIME NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                ");
+
+                if (!db.UserGuides.Any())
+                {
+                    db.UserGuides.Add(new UserGuide
+                    {
+                        Content = "Sistem Kullanım Kılavuzu\n\nBu alana uygulamanın kullanım kılavuzunu ekleyebilirsiniz.",
+                        UpdatedAt = DateTime.Now
+                    });
+                    db.SaveChanges();
+                }
+            }
+            catch { }
             
             // Create initial agreement if none exists
             if (!db.Agreements.Any())
