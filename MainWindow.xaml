@@ -1,4 +1,4 @@
-﻿<Window x:Class="Synctool.MainWindow"
+<Window x:Class="Synctool.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -62,42 +62,87 @@
         <Style TargetType="{x:Type ScrollBar}">
             <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false" />
             <Setter Property="Stylus.IsFlicksEnabled" Value="false" />
-            <Setter Property="Width" Value="8" />
-            <Setter Property="Margin" Value="2,0" />
-            <Setter Property="MinWidth" Value="8" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ScrollBar}">
-                        <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
-                            <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}">
-                                <Track.Thumb>
-                                    <Thumb x:Name="Thumb">
-                                        <Thumb.Template>
-                                            <ControlTemplate TargetType="{x:Type Thumb}">
-                                                <Border x:Name="ThumbBorder" 
-                                                        Background="#B0B8CC" 
-                                                        Opacity="0.4"
-                                                        CornerRadius="4" 
-                                                        Margin="1,2" />
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                        <Setter TargetName="ThumbBorder" Property="Opacity" Value="0.7" />
-                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="#64748B" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsDragging" Value="true">
-                                                        <Setter TargetName="ThumbBorder" Property="Opacity" Value="1.0" />
-                                                        <Setter TargetName="ThumbBorder" Property="Background" Value="#E02020" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Thumb.Template>
-                                    </Thumb>
-                                </Track.Thumb>
-                            </Track>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="8" />
+                    <Setter Property="Height" Value="Auto" />
+                    <Setter Property="Margin" Value="2,0" />
+                    <Setter Property="MinWidth" Value="8" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
+                                    <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}">
+                                        <Track.Thumb>
+                                            <Thumb x:Name="Thumb">
+                                                <Thumb.Template>
+                                                    <ControlTemplate TargetType="{x:Type Thumb}">
+                                                        <Border x:Name="ThumbBorder" 
+                                                                Background="#B0B8CC" 
+                                                                Opacity="0.4"
+                                                                CornerRadius="4" 
+                                                                Margin="1,2" />
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="true">
+                                                                <Setter TargetName="ThumbBorder" Property="Opacity" Value="0.7" />
+                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="#64748B" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsDragging" Value="true">
+                                                                <Setter TargetName="ThumbBorder" Property="Opacity" Value="1.0" />
+                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="#E02020" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Thumb.Template>
+                                            </Thumb>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Width" Value="Auto" />
+                    <Setter Property="Height" Value="8" />
+                    <Setter Property="Margin" Value="0,2" />
+                    <Setter Property="MinHeight" Value="8" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" SnapsToDevicePixels="true" Background="Transparent">
+                                    <Track x:Name="PART_Track" IsDirectionReversed="false" IsEnabled="{TemplateBinding IsEnabled}">
+                                        <Track.Thumb>
+                                            <Thumb x:Name="Thumb">
+                                                <Thumb.Template>
+                                                    <ControlTemplate TargetType="{x:Type Thumb}">
+                                                        <Border x:Name="ThumbBorder" 
+                                                                Background="#B0B8CC" 
+                                                                Opacity="0.4"
+                                                                CornerRadius="4" 
+                                                                Margin="2,1" />
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="true">
+                                                                <Setter TargetName="ThumbBorder" Property="Opacity" Value="0.7" />
+                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="#64748B" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsDragging" Value="true">
+                                                                <Setter TargetName="ThumbBorder" Property="Opacity" Value="1.0" />
+                                                                <Setter TargetName="ThumbBorder" Property="Background" Value="#E02020" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Thumb.Template>
+                                            </Thumb>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 

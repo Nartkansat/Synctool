@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\synctoolRedYazısız.ico</ApplicationIcon>
     <StartupObject></StartupObject>
-    <Version>3.1.0</Version>
+    <Version>3.1.1</Version>
     <AssemblyName>synctool</AssemblyName>
     <Product>synctool</Product>
     <Title>synctool</Title>

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Synctool.Views.BeyazEsyaView"
+<UserControl x:Class="Synctool.Views.BeyazEsyaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -83,11 +83,28 @@
                       AlternatingRowBackground="#FAFAFA"
                       GridLinesVisibility="Horizontal"
                       HorizontalGridLinesBrush="#F1F5F9"
-                      materialDesign:DataGridAssist.CellPadding="12,8,12,8"
+                      materialDesign:DataGridAssist.CellPadding="14,8,8,8"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                       EnableRowVirtualization="True"
                       EnableColumnVirtualization="True"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </DataGrid.Resources>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Excel'de Aç" Click="MenuItem_OpenExcel_Click">
@@ -114,32 +131,82 @@
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Ürün Kodu" Binding="{Binding ProductCode}" Width="130"/>
-                    <DataGridTextColumn Header="Ürün Adı" Binding="{Binding ProductName}" Width="*"/>
-                    <DataGridTextColumn Header="Valör" Binding="{Binding ActiveValorText}" Width="110"/>
-                    <DataGridTextColumn x:Name="ColBasePrice" Header="Baz Fiyat" Binding="{Binding PricePP, StringFormat={}{0:N2} ₺}" Width="140"/>
-                    <DataGridTextColumn Header="İndirim" Binding="{Binding DiscountAmount, StringFormat={}{0:N2} ₺}" Width="100"/>
-                    <DataGridTextColumn Header="Net İndirim" Binding="{Binding PriceConversion, StringFormat={}{0:N2} ₺}" Width="110"/>
-                    <DataGridTextColumn Header="Net Maliyet" Binding="{Binding PurchasePrice, StringFormat={}{0:N2} ₺}" Width="120">
+                    <DataGridTextColumn Header="Ürün Kodu" Binding="{Binding ProductCode}" Width="115"/>
+                    <DataGridTextColumn Header="Ürün Adı" Binding="{Binding ProductName}" Width="*" MinWidth="150"/>
+                    <DataGridTextColumn Header="Valör" Binding="{Binding ActiveValorText}" Width="95"/>
+                    <DataGridTextColumn x:Name="ColBasePrice" Header="Baz Fiyat" Binding="{Binding PricePP, StringFormat={}{0:N2} ₺}" Width="110">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="İndirim" Binding="{Binding DiscountAmount, StringFormat={}{0:N2} ₺}" Width="90">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Net İndirim" Binding="{Binding PriceConversion, StringFormat={}{0:N2} ₺}" Width="110">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Net Maliyet" Binding="{Binding PurchasePrice, StringFormat={}{0:N2} ₺}" Width="115">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                 <Setter Property="Foreground" Value="#16A34A"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn x:Name="ColCardPrice"  Binding="{Binding CardPurchasePrice, StringFormat={}{0:N2} ₺}" Width="140">
+                    <DataGridTextColumn x:Name="ColCardPrice"  Binding="{Binding CardPurchasePrice, StringFormat={}{0:N2} ₺}" Width="135">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                 <Setter Property="Foreground" Value="#DC2626"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Tarih" Binding="{Binding CreatedDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100"/>
+                    <!-- <DataGridTextColumn Header="Tarih" Binding="{Binding CreatedDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100"/> -->
 
                     <!-- Manuel Kampanya Butonu -->
-                    <DataGridTemplateColumn Header="Kampanya" Width="120">
+                    <DataGridTemplateColumn Header="Kampanya" Width="110">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button x:Name="BtnShowManualCampaign"
