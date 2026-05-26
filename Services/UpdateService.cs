@@ -6,7 +6,7 @@ namespace Synctool.Services
     public static class UpdateService
     {
         // GitHub deponuz Public olduğu için direkt raw URL kullanıyoruz.
-        private const string UpdateXmlUrl = "https://raw.githubusercontent.com/Nartkansat/ArcelikApp/main/update.xml";
+        private const string UpdateXmlUrl = "https://raw.githubusercontent.com/Nartkansat/Synctool/main/update.xml";
 
         public static void CheckForUpdates()
         {
