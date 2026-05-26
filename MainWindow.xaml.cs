@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Synctool.Views;
-using Synctool.Services;
 using Synctool.Services;
 using Synctool.Models;
 using System.Collections.ObjectModel;
@@ -49,17 +48,13 @@ namespace Synctool
             }
 
             // Subscribe to notification changes
-            NotificationService.NotificationsChanged += (s, e) => {
-                Dispatcher.Invoke(() => _ = RefreshNotificationsAsync());
-            };
+            NotificationService.NotificationsChanged += NotificationService_NotificationsChanged;
             
             // Subscribe to Modern Dialog Service
             ModernDialogService.DialogRequested += ModernDialogService_DialogRequested;
 
             // Subscribe to Cart changes
-            CartService.Instance.CartChanged += (s, e) => {
-                Dispatcher.Invoke(() => RefreshCartUI());
-            };
+            CartService.Instance.CartChanged += CartService_CartChanged;
             RefreshCartUI();
             
             _ = RefreshNotificationsAsync();
@@ -303,7 +298,7 @@ namespace Synctool
             }
         }
 
-        private async void Nav_Click(object sender, RoutedEventArgs e)
+        private async void Nav_Click(object sender, RoutedEventArgs? e)
         {
             // Session kontrolünü cache'le — her tıklamada DB'ye gitmesin
             if (DateTime.Now - _lastSessionCheck > SessionCheckInterval)
@@ -340,9 +335,9 @@ namespace Synctool
             }
         }
 
-        public void NavigateToPage(string tag, object parameter = null)
+        public void NavigateToPage(string tag, object? parameter = null)
         {
-            Button targetBtn = FindButtonByTag(MenuStackPanel, tag);
+            Button? targetBtn = FindButtonByTag(MenuStackPanel, tag);
             if (targetBtn != null)
             {
                 ResetNavButtons(MenuStackPanel);
@@ -353,8 +348,9 @@ namespace Synctool
             }
         }
 
-        private Button FindButtonByTag(Panel parent, string tag)
+        private Button? FindButtonByTag(Panel? parent, string tag)
         {
+            if (parent == null) return null;
             foreach (var child in parent.Children)
             {
                 if (child is Button btn && btn.Tag as string == tag) return btn;
@@ -376,7 +372,7 @@ namespace Synctool
             BorderPageIcon.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(iconBg));
         }
 
-        private void PerformNavigation(string tag, object parameter = null)
+        private void PerformNavigation(string tag, object? parameter = null)
         {
             switch (tag)
                 {
@@ -586,13 +582,39 @@ namespace Synctool
 
         #endregion
 
-        private void BtnLogout_Click(object sender, RoutedEventArgs e)
+        private void BtnLogout_Click(object? sender, RoutedEventArgs? e)
         {
             _ = Task.Run(() => AuthService.Logout());
             LoginWindow login = new LoginWindow();
             login.Visibility = Visibility.Visible;
             login.Show();
             this.Close();
+        }
+
+        private void NotificationService_NotificationsChanged(object? sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() => _ = RefreshNotificationsAsync());
+        }
+
+        private void CartService_CartChanged(object? sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() => RefreshCartUI());
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            // Unsubscribe from static/singleton events to prevent memory leaks and deadlocks
+            NotificationService.NotificationsChanged -= NotificationService_NotificationsChanged;
+            ModernDialogService.DialogRequested -= ModernDialogService_DialogRequested;
+            CartService.Instance.CartChanged -= CartService_CartChanged;
+
+            if (_notificationPollTimer != null)
+            {
+                _notificationPollTimer.Stop();
+                _notificationPollTimer.Tick -= NotificationPollTimer_Tick;
+            }
         }
         #endregion
     }

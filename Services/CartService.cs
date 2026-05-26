@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,12 +8,12 @@ namespace Synctool.Services
 {
     public class CartService
     {
-        private static CartService _instance;
+        private static CartService? _instance;
         public static CartService Instance => _instance ??= new CartService();
 
         public ObservableCollection<CartItem> Items { get; } = new ObservableCollection<CartItem>();
 
-        public event EventHandler CartChanged;
+        public event EventHandler? CartChanged;
 
         private CartService() { }
 

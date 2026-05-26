@@ -1,9 +1,9 @@
-﻿namespace Synctool.Models
+namespace Synctool.Models
 {
     public class OlizCampaign
     {
         public int Id { get; set; }
-        public string Brand { get; set; }
+        public string Brand { get; set; } = string.Empty;
         public string ProductGroup { get; set; } = string.Empty;
         public string ProductCode { get; set; } = string.Empty;
         public string ProductDescription { get; set; } = string.Empty;

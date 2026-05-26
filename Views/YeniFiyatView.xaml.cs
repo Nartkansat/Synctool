@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Models;
 using OfficeOpenXml;
 using System;
@@ -338,7 +338,7 @@ namespace Synctool.Views
             decimal pricePP, string pricePPSource, decimal markupPct,
             Dictionary<string, OlizCampaign> campaignLookup)
         {
-            OlizCampaign campaign = null;
+            OlizCampaign? campaign = null;
             string codeKey = productCode?.Trim().ToUpperInvariant() ?? string.Empty;
             bool hasCampaign = false;
 
@@ -362,18 +362,18 @@ namespace Synctool.Views
 
             return new CostRow
             {
-                ProductId         = productId,
-                ProductCode       = productCode,
-                ProductName       = productName,
-                Kategori          = kategori,
-                PricePPSource     = pricePPSource,
+                ProductId         = productId ?? string.Empty,
+                ProductCode       = productCode ?? string.Empty,
+                ProductName       = productName ?? string.Empty,
+                Kategori          = kategori ?? string.Empty,
+                PricePPSource     = pricePPSource ?? string.Empty,
                 PricePP           = pricePP,
                 PriceConversion   = priceConversion,
                 PurchasePrice     = purchasePrice,
                 CardMarkupPercent = markupPct,
                 CardPurchasePrice = cardPurchasePrice,
                 HasCampaign       = hasCampaign,
-                CampaingDate      = campaignDate
+                CampaingDate      = campaignDate ?? string.Empty
             };
         }
 

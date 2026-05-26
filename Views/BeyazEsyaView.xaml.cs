@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Models;
 using Synctool.Services;
 using System;
@@ -11,8 +11,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Synctool.Models;
-using Synctool.Services;
 using MaterialDesignThemes.Wpf;
 using Microsoft.EntityFrameworkCore;
 
@@ -101,6 +99,7 @@ namespace Synctool.Views
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            ClearCache();
             _ = InitAsync();
             this.Focus();
         }
@@ -136,19 +135,25 @@ namespace Synctool.Views
             if (_cache.Count > 0 && (DateTime.Now - _cacheTime) < CacheExpiry) return;
             try
             {
+                // Yükleme esnasında eski verilerin görünmesini engellemek için grid'i temizle
+                GridBeyazEsya.ItemsSource = null;
                 OverlayLoading.Visibility = Visibility.Visible;
                 _cache = await Task.Run(() =>
                 {
                     using var db = new AppDbContext();
                     var calcs = db.CostCalculations
+                        .AsNoTracking()
                         .Where(c => c.SourceTable == "WhiteGoods")
                         .OrderByDescending(c => c.Id)
                         .ToList();
 
-                    var productCodes = calcs.Select(c => c.ProductCode).Distinct().ToList();
+                    // Tüm kampanya verisi çekilip bellek üzerinde eşleştiriliyor.
+                    // productCodes.Contains(...) yerine bu yaklaşım EF Core'un
+                    // binlerce SQL parametresi derlemesini önler.
                     var campaigns = db.ManualCampaignProducts
-                        .Where(mcp => productCodes.Contains(mcp.ProductCode))
+                        .Where(mcp => !string.IsNullOrEmpty(mcp.ProductCode))
                         .Select(mcp => new { mcp.ProductCode, mcp.ManualCampaign.Description })
+                        .AsNoTracking()
                         .AsEnumerable()
                         .GroupBy(x => x.ProductCode)
                         .ToDictionary(
@@ -157,7 +162,7 @@ namespace Synctool.Views
                         );
 
                     var olizCampaigns = db.OlizCampaigns
-                        .Where(oc => productCodes.Contains(oc.ProductCode))
+                        .Where(oc => !string.IsNullOrEmpty(oc.ProductCode))
                         .Select(oc => new { oc.ProductCode, oc.DiscountAmount, oc.Id })
                         .AsNoTracking()
                         .ToList()
@@ -169,7 +174,7 @@ namespace Synctool.Views
                         );
 
                     var wgProducts = db.WhiteGoodsProducts
-                        .Where(p => productCodes.Contains(p.ProductCode))
+                        .Where(p => !string.IsNullOrEmpty(p.ProductCode))
                         .Select(p => new {
                             p.ProductCode,
                             p.ExcelFileType,
@@ -206,9 +211,9 @@ namespace Synctool.Views
                         {
                             Id = c.Id,
                             ProductId = c.ProductId,
-                            ProductCode = c.ProductCode,
-                            ProductName = c.ProductName,
-                            SourceTable = c.SourceTable,
+                            ProductCode = c.ProductCode ?? string.Empty,
+                            ProductName = c.ProductName ?? string.Empty,
+                            SourceTable = c.SourceTable ?? string.Empty,
                             PricePP = c.PricePP,
                             PricePPSource = c.PricePPSource,
                             PriceConversion = c.PriceConversion,
@@ -217,8 +222,8 @@ namespace Synctool.Views
                             CardPurchasePrice = c.CardPurchasePrice,
                             CampaingDate = c.CampaingDate,
                             CreatedDate = c.CreatedDate,
-                            ManualCampaignText = campaigns.TryGetValue(c.ProductCode, out var txt) ? txt : string.Empty,
-                            DiscountAmount = olizCampaigns.TryGetValue(c.ProductCode, out var disc) ? disc : 0m,
+                            ManualCampaignText = campaigns.TryGetValue(c.ProductCode ?? string.Empty, out var txt) ? txt : string.Empty,
+                            DiscountAmount = olizCampaigns.TryGetValue(c.ProductCode ?? string.Empty, out var disc) ? disc : 0m,
 
                             CashPrice = cash,
                             WholesalePrice30 = w30,

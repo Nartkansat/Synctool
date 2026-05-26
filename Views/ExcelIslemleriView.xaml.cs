@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using OfficeOpenXml;
@@ -241,7 +241,7 @@ namespace Synctool.Views
 
                     if (alreadyExists)
                     {
-                        string monthName = ((ComboBoxItem)CmbPeriodMonth.SelectedItem).Content.ToString();
+                        string monthName = ((ComboBoxItem)CmbPeriodMonth.SelectedItem)?.Content?.ToString() ?? string.Empty;
                         await ModernDialogService.ShowAsync(
                             "Kayıt Zaten Mevcut",
                             $"'{whiteGoodsType}' için {monthName} {selectedYear} dönemine ait geçmiş fiyat kaydı zaten mevcut. Aynı dönem tekrar eklenemez.",
@@ -642,19 +642,19 @@ namespace Synctool.Views
                 {
                     var copy = new OlizCampaign
                     {
-                        Brand = c.Brand,
-                        ProductGroup = c.ProductGroup,
-                        ProductCode = c.ProductCode,
-                        ProductDescription = c.ProductDescription,
+                        Brand = c.Brand ?? string.Empty,
+                        ProductGroup = c.ProductGroup ?? string.Empty,
+                        ProductCode = c.ProductCode ?? string.Empty,
+                        ProductDescription = c.ProductDescription ?? string.Empty,
                         DiscountAmount = c.DiscountAmount,
                         DiscountNetAmount = c.DiscountNetAmount,
-                        CampaignStartDate = c.CampaignStartDate,
-                        CampaignEndDate = c.CampaignEndDate,
-                        LastTransportDate = c.LastTransportDate,
-                        LastBarcodeScanDate = c.LastBarcodeScanDate,
-                        CampaignCode = c.CampaignCode,
-                        CampaignShortDescription = c.CampaignShortDescription,
-                        GeneralDescription = c.GeneralDescription,
+                        CampaignStartDate = c.CampaignStartDate ?? string.Empty,
+                        CampaignEndDate = c.CampaignEndDate ?? string.Empty,
+                        LastTransportDate = c.LastTransportDate ?? string.Empty,
+                        LastBarcodeScanDate = c.LastBarcodeScanDate ?? string.Empty,
+                        CampaignCode = c.CampaignCode ?? string.Empty,
+                        CampaignShortDescription = c.CampaignShortDescription ?? string.Empty,
+                        GeneralDescription = c.GeneralDescription ?? string.Empty,
                         UploadedFileId = fileId // Yeni dosya ID'sine bağlıyoruz
                     };
 

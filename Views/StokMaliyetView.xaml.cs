@@ -1,8 +1,7 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.DTOs;
 using Synctool.Services;
 using Synctool.Models;
-using Synctool.Services;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
@@ -152,7 +151,7 @@ namespace Synctool.Views
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                string file = files.FirstOrDefault(x => x.EndsWith(".xlsx") || x.EndsWith(".xls") || x.EndsWith(".xlsm"));
+                string? file = files.FirstOrDefault(x => x.EndsWith(".xlsx") || x.EndsWith(".xls") || x.EndsWith(".xlsm"));
                 if (!string.IsNullOrEmpty(file))
                 {
                     LoadExcelHeaders(file);

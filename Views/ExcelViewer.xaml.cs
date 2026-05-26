@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Models;
 using Microsoft.Win32;
 using OfficeOpenXml;
@@ -92,10 +92,31 @@ namespace Synctool.Views
                 : _allFiles.Where(x => x.FileName.ToLower().Contains(query)).ToList();
         }
 
+        private void ResetEmptyState()
+        {
+            IconEmptyState.Kind = MaterialDesignThemes.Wpf.PackIconKind.MicrosoftExcel;
+            IconEmptyState.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CBD5E1"));
+            TxtEmptyStateMessage.Text = "Görüntülemek için sol taraftan bir dosya seçin veya sürükleyin.";
+        }
+
         private async void ListFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ListFiles.SelectedItem is UploadedFile selectedFile)
             {
+                if (selectedFile.Category == "Sistem" || selectedFile.FileName == "Arşivlenmiş Dosya Verisi")
+                {
+                    TabWorksheets.Items.Clear();
+                    PnlExcelToolbar.Visibility = Visibility.Collapsed;
+                    
+                    IconEmptyState.Kind = MaterialDesignThemes.Wpf.PackIconKind.ArchiveOutline;
+                    IconEmptyState.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B"));
+                    TxtEmptyStateMessage.Text = "Bu kayıt, geçmiş dönem maliyet verilerinin veri bütünlüğünü korumak amacıyla sistem tarafından arşivlenmiştir ve fiziksel bir Excel dosyası içermemektedir.\n\nGeçmiş dönem fiyat analizlerini sol menüdeki 'Eski Fiyat Arşivi' sayfasından inceleyebilirsiniz.";
+                    PnlEmptyState.Visibility = Visibility.Visible;
+                    OverlayLoading.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                ResetEmptyState();
                 OverlayLoading.Visibility = Visibility.Visible;
                 try
                 {
@@ -136,9 +157,10 @@ namespace Synctool.Views
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                string file = files.FirstOrDefault(x => x.EndsWith(".xlsx") || x.EndsWith(".xls"));
+                string? file = files.FirstOrDefault(x => x.EndsWith(".xlsx") || x.EndsWith(".xls"));
                 if (!string.IsNullOrEmpty(file))
                 {
+                    ResetEmptyState();
                     await LoadExcelFileAsync(await File.ReadAllBytesAsync(file), Path.GetFileName(file));
                     ListFiles.SelectedItem = null; // Unselect DB file
                 }
@@ -155,6 +177,7 @@ namespace Synctool.Views
 
             if (openFileDialog.ShowDialog() == true)
             {
+                ResetEmptyState();
                 await LoadExcelFileAsync(await File.ReadAllBytesAsync(openFileDialog.FileName), Path.GetFileName(openFileDialog.FileName));
                 ListFiles.SelectedItem = null; // Unselect DB file
             }

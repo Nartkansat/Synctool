@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Services;
 using Synctool.Models;
 using System.Windows;
@@ -28,23 +28,27 @@ namespace Synctool.Views
                 TxtProfileName.Text = AuthService.CurrentUser.Username;
                 TxtProfileRole.Text = AuthService.CurrentUser.Role + " Yetkisi";
 
-                // Yetki Kontrolü: Sadece Admin veri sıfırlama panelini görebilir
+                // Kullanım kılavuzu tüm giriş yapmış kullanıcılara açık
+                TabUserGuide.Visibility = Visibility.Visible;
+                LoadUserGuide();
+
+                // Yetki Kontrolü: Sadece Admin veri sıfırlama panelini görebilir ve düzenleyebilir
                 if (AuthService.CurrentUser.Role == "Admin")
                 {
                     TabDataManagement.Visibility = Visibility.Visible;
                     TabAgreementManagement.Visibility = Visibility.Visible;
-                    TabUserGuide.Visibility = Visibility.Visible;
+                    BtnEditUserGuideToggle.Visibility = Visibility.Visible;
 
                     // Mevcut verileri yükle
                     LoadCurrentAgreement();
-                    LoadUserGuide();
                     LoadAgreementsHistoryAndConsents();
                 }
                 else
                 {
                     TabDataManagement.Visibility = Visibility.Collapsed;
                     TabAgreementManagement.Visibility = Visibility.Collapsed;
-                    TabUserGuide.Visibility = Visibility.Collapsed;
+                    BtnEditUserGuideToggle.Visibility = Visibility.Collapsed;
+                    BtnSaveUserGuide.Visibility = Visibility.Collapsed;
                 }
             }
             else
@@ -52,6 +56,7 @@ namespace Synctool.Views
                 // Kullanıcı oturumu yoksa (güvenlik için) paneli gizle
                 TabDataManagement.Visibility = Visibility.Collapsed;
                 TabAgreementManagement.Visibility = Visibility.Collapsed;
+                TabUserGuide.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -237,6 +242,7 @@ namespace Synctool.Views
 
         private async void BtnResetTables_Click(object sender, RoutedEventArgs e)
         {
+            await Task.CompletedTask;
             // Güvenlik Kontrolü: Kod seviyesinde yetki doğrulaması
             if (AuthService.CurrentUser?.Role != "Admin")
             {
@@ -275,23 +281,23 @@ namespace Synctool.Views
             {
                 BtnCancelAlert.Visibility = Visibility.Visible;
                 BtnConfirmAction.Content = "Evet, Sıfırla";
-                BtnConfirmAction.Background = (Brush)new BrushConverter().ConvertFrom("#E02020");
-                BtnConfirmAction.BorderBrush = (Brush)new BrushConverter().ConvertFrom("#E02020");
+                BtnConfirmAction.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
+                BtnConfirmAction.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02020"));
                 
                 IconAlert.Kind = PackIconKind.AlertCircleOutline;
-                BorderAlertIcon.Background = (Brush)new BrushConverter().ConvertFrom("#FFF3E0");
-                IconAlert.Foreground = (Brush)new BrushConverter().ConvertFrom("#FF9800");
+                BorderAlertIcon.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF3E0"));
+                IconAlert.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9800"));
             }
             else
             {
                 BtnCancelAlert.Visibility = Visibility.Collapsed;
                 BtnConfirmAction.Content = "Anladım";
-                BtnConfirmAction.Background = (Brush)new BrushConverter().ConvertFrom("#1A1A24");
-                BtnConfirmAction.BorderBrush = (Brush)new BrushConverter().ConvertFrom("#1A1A24");
+                BtnConfirmAction.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A1A24"));
+                BtnConfirmAction.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A1A24"));
 
                 IconAlert.Kind = PackIconKind.InformationOutline;
-                BorderAlertIcon.Background = (Brush)new BrushConverter().ConvertFrom("#E3F2FD");
-                IconAlert.Foreground = (Brush)new BrushConverter().ConvertFrom("#2196F3");
+                BorderAlertIcon.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E3F2FD"));
+                IconAlert.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2196F3"));
             }
 
             AlertOverlay.Visibility = Visibility.Visible;
@@ -409,6 +415,7 @@ namespace Synctool.Views
                     return guide?.Content ?? string.Empty;
                 });
                 TxtUserGuideContent.Text = content;
+                WebUserGuideView.NavigateToString(FormatUserGuideToHtml(content));
             }
             catch (System.Exception ex)
             {
@@ -439,6 +446,16 @@ namespace Synctool.Views
                 if (success)
                 {
                     ShowToast("Kullanım kılavuzu başarıyla kaydedildi.");
+                    
+                    // Görünüm moduna geri dön
+                    BorderUserGuideView.Visibility = Visibility.Visible;
+                    BorderUserGuideEdit.Visibility = Visibility.Collapsed;
+                    BtnSaveUserGuide.Visibility = Visibility.Collapsed;
+                    BtnEditUserGuideToggle.Content = "Düzenle";
+                    BtnEditUserGuideToggle.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D97706"));
+                    BtnEditUserGuideToggle.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D97706"));
+                    
+                    LoadUserGuide();
                 }
                 else
                 {
@@ -453,6 +470,255 @@ namespace Synctool.Views
             {
                 BtnSaveUserGuide.IsEnabled = true;
             }
+        }
+
+        private void BtnEditUserGuideToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (BorderUserGuideView.Visibility == Visibility.Visible)
+            {
+                // Düzenleme moduna geç
+                BorderUserGuideView.Visibility = Visibility.Collapsed;
+                BorderUserGuideEdit.Visibility = Visibility.Visible;
+                BtnSaveUserGuide.Visibility = Visibility.Visible;
+                BtnEditUserGuideToggle.Content = "Vazgeç";
+                BtnEditUserGuideToggle.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
+                BtnEditUserGuideToggle.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444"));
+            }
+            else
+            {
+                // Görünüm moduna geri dön
+                BorderUserGuideView.Visibility = Visibility.Visible;
+                BorderUserGuideEdit.Visibility = Visibility.Collapsed;
+                BtnSaveUserGuide.Visibility = Visibility.Collapsed;
+                BtnEditUserGuideToggle.Content = "Düzenle";
+                BtnEditUserGuideToggle.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D97706"));
+                BtnEditUserGuideToggle.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D97706"));
+                
+                // Kaydedilmemiş değişiklikleri geri al
+                LoadUserGuide();
+            }
+        }
+
+        private string FormatUserGuideToHtml(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return @"
+<html>
+<head>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            color: #64748B;
+            background-color: #FFFFFF;
+            margin: 0;
+            padding: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <p>Kullanım kılavuzu henüz eklenmemiş.</p>
+</body>
+</html>";
+            }
+
+            var lines = content.Split(new[] { "\r\n", "\r", "\n" }, System.StringSplitOptions.None);
+            var htmlBuilder = new System.Text.StringBuilder();
+
+            htmlBuilder.AppendLine("<html>");
+            htmlBuilder.AppendLine("<head>");
+            htmlBuilder.AppendLine("    <meta http-equiv='X-UA-Compatible' content='IE=edge'>");
+            htmlBuilder.AppendLine("    <meta charset='utf-8'>");
+            htmlBuilder.AppendLine("    <style>");
+            htmlBuilder.AppendLine("        body {");
+            htmlBuilder.AppendLine("            font-family: 'Segoe UI', -apple-system, sans-serif;");
+            htmlBuilder.AppendLine("            color: #334155;");
+            htmlBuilder.AppendLine("            background-color: #FFFFFF;");
+            htmlBuilder.AppendLine("            line-height: 1.6;");
+            htmlBuilder.AppendLine("            margin: 0;");
+            htmlBuilder.AppendLine("            padding: 24px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        h1 {");
+            htmlBuilder.AppendLine("            color: #1E293B;");
+            htmlBuilder.AppendLine("            font-size: 20px;");
+            htmlBuilder.AppendLine("            font-weight: 800;");
+            htmlBuilder.AppendLine("            margin-top: 0;");
+            htmlBuilder.AppendLine("            margin-bottom: 20px;");
+            htmlBuilder.AppendLine("            padding-bottom: 12px;");
+            htmlBuilder.AppendLine("            border-bottom: 2px solid #D97706;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        h2 {");
+            htmlBuilder.AppendLine("            color: #1E293B;");
+            htmlBuilder.AppendLine("            font-size: 15px;");
+            htmlBuilder.AppendLine("            font-weight: 700;");
+            htmlBuilder.AppendLine("            margin-top: 24px;");
+            htmlBuilder.AppendLine("            margin-bottom: 12px;");
+            htmlBuilder.AppendLine("            border-bottom: 1px dashed #CBD5E1;");
+            htmlBuilder.AppendLine("            padding-bottom: 6px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        p {");
+            htmlBuilder.AppendLine("            margin-top: 0;");
+            htmlBuilder.AppendLine("            margin-bottom: 12px;");
+            htmlBuilder.AppendLine("            font-size: 13px;");
+            htmlBuilder.AppendLine("            color: #475569;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        ul {");
+            htmlBuilder.AppendLine("            margin-top: 0;");
+            htmlBuilder.AppendLine("            margin-bottom: 16px;");
+            htmlBuilder.AppendLine("            padding-left: 20px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        li {");
+            htmlBuilder.AppendLine("            font-size: 13px;");
+            htmlBuilder.AppendLine("            color: #475569;");
+            htmlBuilder.AppendLine("            margin-bottom: 6px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        .card {");
+            htmlBuilder.AppendLine("            padding: 12px 16px;");
+            htmlBuilder.AppendLine("            border-radius: 8px;");
+            htmlBuilder.AppendLine("            margin-bottom: 16px;");
+            htmlBuilder.AppendLine("            font-size: 13px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        .card-warning {");
+            htmlBuilder.AppendLine("            background-color: #FEF2F2;");
+            htmlBuilder.AppendLine("            border-left: 4px solid #EF4444;");
+            htmlBuilder.AppendLine("            border-top: 1px solid #FEE2E2;");
+            htmlBuilder.AppendLine("            border-right: 1px solid #FEE2E2;");
+            htmlBuilder.AppendLine("            border-bottom: 1px solid #FEE2E2;");
+            htmlBuilder.AppendLine("            color: #991B1B;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        .card-warning-title {");
+            htmlBuilder.AppendLine("            font-weight: bold;");
+            htmlBuilder.AppendLine("            color: #7F1D1D;");
+            htmlBuilder.AppendLine("            margin-bottom: 4px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        .card-info {");
+            htmlBuilder.AppendLine("            background-color: #F0F9FF;");
+            htmlBuilder.AppendLine("            border-left: 4px solid #0284C7;");
+            htmlBuilder.AppendLine("            border-top: 1px solid #E0F2FE;");
+            htmlBuilder.AppendLine("            border-right: 1px solid #E0F2FE;");
+            htmlBuilder.AppendLine("            border-bottom: 1px solid #E0F2FE;");
+            htmlBuilder.AppendLine("            color: #0369A1;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("        .card-info-title {");
+            htmlBuilder.AppendLine("            font-weight: bold;");
+            htmlBuilder.AppendLine("            color: #0C4A6E;");
+            htmlBuilder.AppendLine("            margin-bottom: 4px;");
+            htmlBuilder.AppendLine("        }");
+            htmlBuilder.AppendLine("    </style>");
+            htmlBuilder.AppendLine("</head>");
+            htmlBuilder.AppendLine("<body>");
+
+            bool inList = false;
+            bool isFirstLine = true;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string rawLine = lines[i];
+                string trimmedLine = rawLine.Trim();
+
+                if (string.IsNullOrWhiteSpace(trimmedLine))
+                {
+                    if (inList)
+                    {
+                        htmlBuilder.AppendLine("    </ul>");
+                        inList = false;
+                    }
+                    continue;
+                }
+
+                // ilk satır ana başlıktır (H1)
+                if (isFirstLine)
+                {
+                    isFirstLine = false;
+                    htmlBuilder.AppendLine($"    <h1>{System.Net.WebUtility.HtmlEncode(trimmedLine)}</h1>");
+                    continue;
+                }
+
+                // * veya - ile başlayan satırlar listedir
+                if (trimmedLine.StartsWith("*") || trimmedLine.StartsWith("-"))
+                {
+                    if (!inList)
+                    {
+                        htmlBuilder.AppendLine("    <ul>");
+                        inList = true;
+                    }
+                    string itemText = trimmedLine.Substring(1).Trim();
+                    htmlBuilder.AppendLine($"        <li>{System.Net.WebUtility.HtmlEncode(itemText)}</li>");
+                    continue;
+                }
+                else
+                {
+                    if (inList)
+                    {
+                        htmlBuilder.AppendLine("    </ul>");
+                        inList = false;
+                    }
+                }
+
+                // Sayı ile başlayan satırlar (örn: 1. DÖNEM) alt başlıktır (H2)
+                bool isHeader = false;
+                if (trimmedLine.Length > 2)
+                {
+                    int dotIdx = trimmedLine.IndexOf('.');
+                    if (dotIdx > 0 && dotIdx < 5)
+                    {
+                        string prefix = trimmedLine.Substring(0, dotIdx);
+                        if (prefix.All(char.IsLetterOrDigit))
+                        {
+                            isHeader = true;
+                        }
+                    }
+                }
+
+                if (isHeader)
+                {
+                    htmlBuilder.AppendLine($"    <h2>{System.Net.WebUtility.HtmlEncode(trimmedLine)}</h2>");
+                    continue;
+                }
+
+                // DİKKAT: veya UYARI: ile başlayanlar kırmızı uyarı kutusuna alınır
+                if (trimmedLine.StartsWith("DİKKAT:", System.StringComparison.OrdinalIgnoreCase) || 
+                    trimmedLine.StartsWith("UYARI:", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    int colonIdx = trimmedLine.IndexOf(':');
+                    string title = trimmedLine.Substring(0, colonIdx + 1);
+                    string message = trimmedLine.Substring(colonIdx + 1).Trim();
+                    htmlBuilder.AppendLine("    <div class='card card-warning'>");
+                    htmlBuilder.AppendLine($"        <div class='card-warning-title'>⚠️ {System.Net.WebUtility.HtmlEncode(title)}</div>");
+                    htmlBuilder.AppendLine($"        <div>{System.Net.WebUtility.HtmlEncode(message)}</div>");
+                    htmlBuilder.AppendLine("    </div>");
+                    continue;
+                }
+
+                // Sistem Davranışı: veya İpucu: ile başlayanlar mavi bilgi kutusuna alınır
+                if (trimmedLine.StartsWith("Sistem Davranışı:", System.StringComparison.OrdinalIgnoreCase) || 
+                    trimmedLine.StartsWith("İpucu:", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    int colonIdx = trimmedLine.IndexOf(':');
+                    string title = trimmedLine.Substring(0, colonIdx + 1);
+                    string message = trimmedLine.Substring(colonIdx + 1).Trim();
+                    htmlBuilder.AppendLine("    <div class='card card-info'>");
+                    htmlBuilder.AppendLine($"        <div class='card-info-title'>ℹ️ {System.Net.WebUtility.HtmlEncode(title)}</div>");
+                    htmlBuilder.AppendLine($"        <div>{System.Net.WebUtility.HtmlEncode(message)}</div>");
+                    htmlBuilder.AppendLine("    </div>");
+                    continue;
+                }
+
+                // Düz paragraf
+                htmlBuilder.AppendLine($"    <p>{System.Net.WebUtility.HtmlEncode(trimmedLine)}</p>");
+            }
+
+            if (inList)
+            {
+                htmlBuilder.AppendLine("    </ul>");
+            }
+
+            htmlBuilder.AppendLine("</body>");
+            htmlBuilder.AppendLine("</html>");
+
+            return htmlBuilder.ToString();
         }
 
         // ── Lisans Şifreli Gösterim İşlemleri ────────────────────────────────────
@@ -596,8 +862,8 @@ namespace Synctool.Views
                             Role = user.Role,
                             AcceptedVersion = isAccepted ? version : "Yok",
                             IsAcceptedLatest = isAccepted ? "Kabul Etti" : "Kabul Etmedi",
-                            AcceptedAtString = isAccepted ? userConsent.AcceptedAt.ToString("dd.MM.yyyy HH:mm") : "-",
-                            IpAddress = isAccepted ? userConsent.IpAddress : "-",
+                            AcceptedAtString = userConsent != null ? userConsent.AcceptedAt.ToString("dd.MM.yyyy HH:mm") : "-",
+                            IpAddress = userConsent != null ? userConsent.IpAddress : "-",
                             IsAccepted = isAccepted
                         });
                     }

@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Services;
 using Synctool.Models;
 using System.Threading.Tasks;
@@ -197,7 +197,6 @@ namespace Synctool.Views
                 // Yeni sözleşme onayı gerekiyor — RegisterWindow üzerinden değil, doğrudan akış
                 _tempUserForAgreement = result.User;
                 _currentAgreementId = result.LatestAgreementId ?? 0;
-                _isEnforcedAgreement = true;
                 OpenEnforcedAgreement();
                 ShowError(result.Message);
             }
@@ -212,7 +211,6 @@ namespace Synctool.Views
         }
 
         private User? _tempUserForAgreement;
-        private bool _isEnforcedAgreement = false;
         private int _currentAgreementId = 0;
 
         /// <summary>

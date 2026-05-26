@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -49,9 +49,9 @@ namespace Synctool.Services
                 await client.SendMailAsync(mailMessage);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Hata loglanabilir: Debug.WriteLine(ex.Message);
+                // Hata loglanabilir: System.Diagnostics.Debug.WriteLine(ex.Message);
                 return false;
             }
         }

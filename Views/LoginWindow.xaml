@@ -1,13 +1,13 @@
-﻿<Window x:Class="Synctool.Views.LoginWindow"
+<Window x:Class="Synctool.Views.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="Synctool Giriş" Width="920" Height="560"
+        Title="Synctool Giriş" Width="960" Height="600"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" MouseLeftButtonDown="Window_MouseLeftButtonDown"
         Icon="/Assets/synctoolAppIcon.png">
 
-    <Border CornerRadius="20" Background="White">
+    <Border Margin="20" CornerRadius="20" Background="White">
         <Border.Effect>
             <DropShadowEffect Color="#888888" BlurRadius="25" Opacity="0.3" Direction="270" ShadowDepth="5"/>
         </Border.Effect>
@@ -120,14 +120,18 @@
                                     Background="#FFF5F5" CornerRadius="10"
                                     BorderBrush="#FCA5A5" BorderThickness="1"
                                     Padding="14,10" Margin="0,15,0,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon x:Name="BorderErrorIcon" Kind="AlertCircleOutline"
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon x:Name="BorderErrorIcon" Grid.Column="0" Kind="AlertCircleOutline"
                                              Foreground="#EF4444" Width="18" Height="18"
                                              VerticalAlignment="Top" Margin="0,1,0,0"/>
-                                    <TextBlock x:Name="TxtError" Foreground="#B91C1C"
+                                    <TextBlock x:Name="TxtError" Grid.Column="1" Foreground="#B91C1C"
                                                FontSize="13" TextWrapping="Wrap"
                                                Margin="10,0,0,0" LineHeight="18"/>
-                                </StackPanel>
+                                </Grid>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -155,7 +159,7 @@
                                          Height="46" Padding="40,0,30,0" VerticalContentAlignment="Center"/>
                                 <materialDesign:PackIcon Kind="KeyOutline" Width="20" Height="20" Foreground="#64748B" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False"/>
                             </Grid>
-
+ 
                             <StackPanel x:Name="PanelResetPasswords" Visibility="Collapsed" Margin="0,0,0,12">
                                 <!-- Doğrulama Kodu -->
                                 <Grid Margin="0,0,0,12">
@@ -173,9 +177,9 @@
                                                  materialDesign:HintAssist.Hint="Yeni Şifre"
                                                  Padding="40,0,45,0" VerticalContentAlignment="Center" Height="46"/>
                                     <TextBox x:Name="TxtResetNewPasswordVisible" 
-                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                             materialDesign:HintAssist.Hint="Yeni Şifre"
-                                             Visibility="Collapsed" Padding="40,0,45,0" VerticalContentAlignment="Center" Height="46"/>
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:HintAssist.Hint="Yeni Şifre"
+                                                 Visibility="Collapsed" Padding="40,0,45,0" VerticalContentAlignment="Center" Height="46"/>
                                     <materialDesign:PackIcon Kind="LockOutline" Width="20" Height="20" Foreground="#64748B" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False"/>
                                     <Button x:Name="BtnShowResetPassword"
                                             Style="{StaticResource MaterialDesignIconButton}"
@@ -184,7 +188,7 @@
                                         <materialDesign:PackIcon x:Name="IconShowResetPassword" Kind="EyeOffOutline" Width="20" Height="20" Foreground="#94A3B8"/>
                                     </Button>
                                 </Grid>
-
+ 
                                 <!-- Yeni Şifre Tekrar -->
                                 <Grid Height="46">
                                     <PasswordBox x:Name="TxtResetNewPasswordConfirm" 
@@ -192,9 +196,9 @@
                                                  materialDesign:HintAssist.Hint="Yeni Şifre (Tekrar)"
                                                  Padding="40,0,45,0" VerticalContentAlignment="Center" Height="46"/>
                                     <TextBox x:Name="TxtResetNewPasswordConfirmVisible" 
-                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                             materialDesign:HintAssist.Hint="Yeni Şifre (Tekrar)"
-                                             Visibility="Collapsed" Padding="40,0,45,0" VerticalContentAlignment="Center" Height="46"/>
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:HintAssist.Hint="Yeni Şifre (Tekrar)"
+                                                 Visibility="Collapsed" Padding="40,0,45,0" VerticalContentAlignment="Center" Height="46"/>
                                     <materialDesign:PackIcon Kind="LockCheckOutline" Width="20" Height="20" Foreground="#64748B" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False"/>
                                     <Button x:Name="BtnShowResetPasswordConfirm"
                                             Style="{StaticResource MaterialDesignIconButton}"
@@ -204,20 +208,24 @@
                                     </Button>
                                 </Grid>
                             </StackPanel>
-                            
+                             
                             <!-- ── Sıfırlama Hata Mesajı ── -->
                             <Border x:Name="ResetErrorBorder" Visibility="Collapsed"
                                     Background="#FFF5F5" CornerRadius="10"
                                     BorderBrush="#FCA5A5" BorderThickness="1"
                                     Padding="14,10" Margin="0,0,0,16">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon x:Name="BorderResetErrorIcon" Kind="AlertCircleOutline"
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon x:Name="BorderResetErrorIcon" Grid.Column="0" Kind="AlertCircleOutline"
                                              Foreground="#EF4444" Width="18" Height="18"
                                              VerticalAlignment="Top" Margin="0,1,0,0"/>
-                                    <TextBlock x:Name="TxtResetError" Foreground="#B91C1C"
+                                    <TextBlock x:Name="TxtResetError" Grid.Column="1" Foreground="#B91C1C"
                                                FontSize="13" TextWrapping="Wrap"
                                                Margin="10,0,0,0" LineHeight="18"/>
-                                </StackPanel>
+                                </Grid>
                             </Border>
 
                             <!-- Buttons -->

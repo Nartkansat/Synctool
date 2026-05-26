@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Synctool.Views.ExcelViewer"
+<UserControl x:Class="Synctool.Views.ExcelViewer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -120,9 +120,9 @@
                         Background="White" BorderThickness="0"/>
             
             <StackPanel x:Name="PnlEmptyState" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <materialDesign:PackIcon Kind="MicrosoftExcel" Width="80" Height="80" Foreground="#CBD5E1" HorizontalAlignment="Center"/>
-                <TextBlock Text="Görüntülemek için sol taraftan bir dosya seçin veya sürükleyin." 
-                           FontSize="16" Foreground="#94A3B8" Margin="0,16,0,0"/>
+                <materialDesign:PackIcon x:Name="IconEmptyState" Kind="MicrosoftExcel" Width="80" Height="80" Foreground="#CBD5E1" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TxtEmptyStateMessage" Text="Görüntülemek için sol taraftan bir dosya seçin veya sürükleyin." 
+                           FontSize="16" Foreground="#94A3B8" Margin="0,16,0,0" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="500"/>
             </StackPanel>
         </Grid>
 

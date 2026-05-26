@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,8 +15,8 @@ namespace Synctool.Views
 {
     public partial class KampanyaDegisimView : UserControl
     {
-        private string _file1Path;
-        private string _file2Path;
+        private string _file1Path = string.Empty;
+        private string _file2Path = string.Empty;
 
         public KampanyaDegisimView()
         {

@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Services;
 using Synctool.Models;
 using System.Linq;
@@ -257,8 +257,11 @@ namespace Synctool.Views
         {
             try
             {
-                using var db = new AppDbContext();
-                var agreement = db.Agreements.OrderByDescending(a => a.Id).FirstOrDefault();
+                var agreement = await Task.Run(() =>
+                {
+                    using var db = new AppDbContext();
+                    return db.Agreements.OrderByDescending(a => a.Id).FirstOrDefault();
+                });
 
                 if (agreement != null)
                 {
