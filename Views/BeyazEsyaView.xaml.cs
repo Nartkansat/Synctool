@@ -161,12 +161,27 @@ namespace Synctool.Views
                             g => string.Join("\n\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n", g.Select(x => x.Description))
                         );
 
-                    var olizCampaigns = db.OlizCampaigns
+                    // OlizCampaigns: hem ProductCode hem ProductDescription ile arama yapabilmek
+                    // için tam kaydı çekiyoruz. BuildRow'daki description fallback mantığıyla tutarlıdır.
+                    var olizCampaignList = db.OlizCampaigns
                         .Where(oc => !string.IsNullOrEmpty(oc.ProductCode))
-                        .Select(oc => new { oc.ProductCode, oc.DiscountAmount, oc.Id })
+                        .Select(oc => new { oc.ProductCode, oc.ProductDescription, oc.DiscountAmount, oc.Id })
                         .AsNoTracking()
-                        .ToList()
-                        .GroupBy(oc => oc.ProductCode)
+                        .ToList();
+
+                    // ProductCode → DiscountAmount (en son kayıt)
+                    var olizCampaigns = olizCampaignList
+                        .GroupBy(oc => oc.ProductCode.Trim())
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.OrderByDescending(oc => oc.Id).First().DiscountAmount,
+                            StringComparer.OrdinalIgnoreCase
+                        );
+
+                    // ProductDescription → DiscountAmount (fallback: BuildRow ile aynı mantık)
+                    var olizCampaignsByDesc = olizCampaignList
+                        .Where(oc => !string.IsNullOrEmpty(oc.ProductDescription))
+                        .GroupBy(oc => oc.ProductDescription.Trim())
                         .ToDictionary(
                             g => g.Key,
                             g => g.OrderByDescending(oc => oc.Id).First().DiscountAmount,
@@ -223,7 +238,13 @@ namespace Synctool.Views
                             CampaingDate = c.CampaingDate,
                             CreatedDate = c.CreatedDate,
                             ManualCampaignText = campaigns.TryGetValue(c.ProductCode ?? string.Empty, out var txt) ? txt : string.Empty,
-                            DiscountAmount = olizCampaigns.TryGetValue(c.ProductCode ?? string.Empty, out var disc) ? disc : 0m,
+                            // Önce ProductCode ile ara, bulamazsa ProductName (description) ile dene
+                            // Bu, maliyet hesabındaki BuildRow fallback mantığıyla birebir aynıdır
+                            DiscountAmount = olizCampaigns.TryGetValue(c.ProductCode ?? string.Empty, out var disc)
+                                ? disc
+                                : (!string.IsNullOrWhiteSpace(c.ProductName) && olizCampaignsByDesc.TryGetValue(c.ProductName.Trim(), out var discByDesc)
+                                    ? discByDesc
+                                    : 0m),
 
                             CashPrice = cash,
                             WholesalePrice30 = w30,
