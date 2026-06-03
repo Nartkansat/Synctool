@@ -1,4 +1,4 @@
-﻿using Synctool.Excel.Mapping.Profiles;
+using Synctool.Excel.Mapping.Profiles;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,6 +16,7 @@ namespace Synctool.Excel.Mapping
             // --- Beyaz Eşya ---
             { "Ankastre",          AnkastreMappingProfile.Get()          },
             { "Soğutucu",          SogutucuMappingProfile.Get()          },
+            { "Dondurucu",         DondurucuMappingProfile.Get()         },
             { "Çamaşır Makinesi",  CamasirMakinesiMappingProfile.Get()   },
             { "Bulaşık Makinesi",  BulasikMakinesiMappingProfile.Get()   },
             { "Televizyon",        TvMappingProfile.Get()                },
@@ -35,7 +36,7 @@ namespace Synctool.Excel.Mapping
 
         private static readonly Dictionary<string, List<string>> _categoryMap = new(System.StringComparer.OrdinalIgnoreCase)
         {
-            { "Beyaz Eşya", new() { "Ankastre", "Soğutucu", "Çamaşır Makinesi", "Bulaşık Makinesi", "Televizyon", "Klima", "Kurutma Makinesi", "Solo Pişirici", "Isıtıcı Aletler", "Havalandırma" } },
+            { "Beyaz Eşya", new() { "Ankastre", "Soğutucu", "Dondurucu", "Çamaşır Makinesi", "Bulaşık Makinesi", "Televizyon", "Klima", "Kurutma Makinesi", "Solo Pişirici", "Isıtıcı Aletler", "Havalandırma" } },
             { "Kea",        new() { "Mutfak", "Süpürge ve Ütü", "Diğer Elektronik", "Cep Telefonu", "Elektronik" } }
         };
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -16,6 +16,7 @@ namespace Synctool.Services
         public static readonly string[] WhiteGoodsCategories = new[]
         {
             "Soğutucu",
+            "Dondurucu",
             "Çamaşır Makinesi",
             "Bulaşık Makinesi",
             "Ankastre",
