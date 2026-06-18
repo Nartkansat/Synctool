@@ -771,7 +771,8 @@ namespace Synctool.Views
                     var existing = context.OlizCampaigns.FirstOrDefault(c => c.UploadedFileId == lastFile.Id && c.ProductCode == code);
                     if (existing != null)
                     {
-                        existing.DiscountNetAmount = discount;
+                        existing.DiscountAmount = discount;
+                        existing.DiscountNetAmount = discount * 0.85m;
                         existing.CampaignShortDescription = "Manuel Güncellendi";
                     }
                     else
@@ -779,8 +780,8 @@ namespace Synctool.Views
                         context.OlizCampaigns.Add(new OlizCampaign
                         {
                             ProductCode = code,
-                            DiscountNetAmount = discount,
                             DiscountAmount = discount,
+                            DiscountNetAmount = discount * 0.85m,
                             UploadedFileId = lastFile.Id,
                             CampaignShortDescription = "Manuel Eklendi",
                             Brand = "",
@@ -794,11 +795,25 @@ namespace Synctool.Views
                             GeneralDescription = ""
                         });
                     }
+                    
+                    // Anında listelere yansıması için maliyet tablosunu da güncelle
+                    var costCalcs = context.CostCalculations.Where(c => c.ProductCode == code).ToList();
+                    foreach (var calc in costCalcs)
+                    {
+                        calc.PriceConversion = discount * 0.85m;
+                        calc.PurchasePrice = calc.PricePP - calc.PriceConversion;
+                        calc.CardPurchasePrice = Math.Round(calc.PurchasePrice * (1 + calc.CardMarkupPercent / 100m), 2);
+                        calc.CampaingDate = "Manuel Kampanya";
+                    }
+
                     context.SaveChanges();
                 });
 
+                Synctool.Views.BeyazEsyaView.ClearCache();
+                Synctool.Views.KeaView.ClearCache();
+
                 ManualOlizOverlay.Visibility = Visibility.Collapsed;
-                await ModernDialogService.ShowAsync("Başarılı", $"{code} kodlu ürün için {discount} ₺ indirim başarıyla en son Oliz listesine eklendi/güncellendi.\nMaliyet Hesaplama ekranından tekrar hesaplatıp kaydedebilirsiniz.", ModernDialogType.Success);
+                await ModernDialogService.ShowAsync("Başarılı", $"{code} kodlu ürün için {discount} ₺ indirim başarıyla eklendi.\nMaliyetler otomatik olarak güncellendi.", ModernDialogType.Success);
             }
             catch (InvalidOperationException ex)
             {

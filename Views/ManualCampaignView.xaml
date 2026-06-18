@@ -84,20 +84,35 @@
                             </Border>
                             <TextBlock Text="ÜRÜN KODLARI" FontSize="13" FontWeight="Bold" Foreground="#475569" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Text="Her satıra bir ürün kodu gelecek şekilde yazın veya yapıştırın." FontSize="11" Foreground="#94A3B8" Margin="34,0,0,8"/>
-                    </StackPanel>
+                        
+                        <TextBlock Text="1. Kodlar (Kampanya Ana Ürünleri):" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="34,4,0,4"/>
+                        <TextBox x:Name="TxtTriggerProductCodes"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 AcceptsReturn="True" 
+                                 VerticalScrollBarVisibility="Auto"
+                                 materialDesign:HintAssist.Hint="Örn: 65 inç ve üzeri TV kodları..."
+                                 materialDesign:TextFieldAssist.UnderlineBrush="#E11D48"
+                                 TextWrapping="Wrap"
+                                 Margin="34,0,0,12"
+                                 Height="80"
+                                 Padding="10"
+                                 FontSize="13"
+                                 FontFamily="Consolas"/>
 
-                    <TextBox x:Name="TxtProductCodes" Grid.Row="1"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             AcceptsReturn="True" 
-                             VerticalScrollBarVisibility="Auto"
-                             materialDesign:HintAssist.Hint="Ürün kodları..."
-                             materialDesign:TextFieldAssist.UnderlineBrush="#E11D48"
-                             TextWrapping="Wrap"
-                             Margin="0,4,0,0"
-                             Padding="16"
-                             FontSize="13"
-                             FontFamily="Consolas"/>
+                        <TextBlock Text="2. Kodlar (İndirime Giren Ürünler):" FontSize="12" FontWeight="SemiBold" Foreground="#64748B" Margin="34,4,0,4"/>
+                        <TextBox x:Name="TxtTargetProductCodes"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 AcceptsReturn="True" 
+                                 VerticalScrollBarVisibility="Auto"
+                                 materialDesign:HintAssist.Hint="Örn: İndirimli verilecek 32 inç TV kodları..."
+                                 materialDesign:TextFieldAssist.UnderlineBrush="#E11D48"
+                                 TextWrapping="Wrap"
+                                 Margin="34,0,0,0"
+                                 Height="80"
+                                 Padding="10"
+                                 FontSize="13"
+                                 FontFamily="Consolas"/>
+                    </StackPanel>
                 </Grid>
             </materialDesign:Card>
 
@@ -119,15 +134,24 @@
                             <Border Width="24" Height="24" Background="#EFF6FF" CornerRadius="12" VerticalAlignment="Center">
                                 <TextBlock Text="3" Foreground="#2563EB" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <TextBlock Text="KAMPANYA KOŞULLARI VE İÇERİĞİ" FontSize="13" FontWeight="Bold" Foreground="#475569" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="KAMPANYA DETAYLARI" FontSize="13" FontWeight="Bold" Foreground="#475569" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                         
+                        <TextBox x:Name="TxtDiscountPrice" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="İndirim Tutarı / Fiyatı (Örn: 12999)"
+                                 materialDesign:TextFieldAssist.UnderlineBrush="#E11D48"
+                                 Margin="0,0,0,12"
+                                 Height="48"
+                                 FontSize="13"
+                                 Padding="16,0"/>
+
                         <TextBox x:Name="TxtDescription" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="Kampanya detaylarını, indirim yüzdelerini ve geçerlilik koşullarını buraya girin..."
+                                 materialDesign:HintAssist.Hint="Kampanya detaylarını ve geçerlilik koşullarını buraya girin..."
                                  materialDesign:TextFieldAssist.UnderlineBrush="#E11D48"
                                  AcceptsReturn="True"
-                                 Height="110"
+                                 Height="80"
                                  TextWrapping="Wrap"
                                  FontSize="13"
                                  Padding="16"/>

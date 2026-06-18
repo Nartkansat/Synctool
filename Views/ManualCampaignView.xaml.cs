@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.Models;
 using Synctool.Services;
 using System;
@@ -15,7 +15,8 @@ namespace Synctool.Views
         public ManualCampaignView()
         {
             InitializeComponent();
-            TxtProductCodes.TextChanged += TxtProductCodes_TextChanged;
+            TxtTriggerProductCodes.TextChanged += TxtProductCodes_TextChanged;
+            TxtTargetProductCodes.TextChanged += TxtProductCodes_TextChanged;
         }
 
         private void TxtProductCodes_TextChanged(object sender, TextChangedEventArgs e)
@@ -25,7 +26,10 @@ namespace Synctool.Views
 
         private async void UpdatePreview()
         {
-            var codes = GetParsedCodes();
+            var triggerCodes = GetParsedCodes(TxtTriggerProductCodes.Text);
+            var targetCodes = GetParsedCodes(TxtTargetProductCodes.Text);
+            var codes = triggerCodes.Concat(targetCodes).Distinct().ToList();
+
             if (!codes.Any())
             {
                 LstPreview.ItemsSource = null;
@@ -53,11 +57,11 @@ namespace Synctool.Views
             }).Take(100).ToList();
         }
 
-        private List<string> GetParsedCodes()
+        private List<string> GetParsedCodes(string text)
         {
-            if (string.IsNullOrWhiteSpace(TxtProductCodes.Text)) return new List<string>();
+            if (string.IsNullOrWhiteSpace(text)) return new List<string>();
 
-            return TxtProductCodes.Text
+            return text
                 .Split(new[] { '\r', '\n', ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
                 .Distinct()
@@ -72,8 +76,10 @@ namespace Synctool.Views
                 return;
             }
 
-            var codes = GetParsedCodes();
-            if (!codes.Any())
+            var triggerCodes = GetParsedCodes(TxtTriggerProductCodes.Text);
+            var targetCodes = GetParsedCodes(TxtTargetProductCodes.Text);
+            
+            if (!triggerCodes.Any() && !targetCodes.Any())
             {
                 MainSnackbar.MessageQueue?.Enqueue("Lütfen en az bir ürün kodu girin.");
                 return;
@@ -84,6 +90,20 @@ namespace Synctool.Views
             {
                 MainSnackbar.MessageQueue?.Enqueue("Lütfen kampanya açıklaması yazın.");
                 return;
+            }
+
+            decimal? discountPrice = null;
+            if (!string.IsNullOrWhiteSpace(TxtDiscountPrice.Text))
+            {
+                if (decimal.TryParse(TxtDiscountPrice.Text.Replace(",", "."), out decimal parsedDiscount))
+                {
+                    discountPrice = parsedDiscount;
+                }
+                else
+                {
+                    MainSnackbar.MessageQueue?.Enqueue("Lütfen geçerli bir indirim tutarı girin.");
+                    return;
+                }
             }
 
             var categoryItem = CmbCategory.SelectedItem as ComboBoxItem;
@@ -98,9 +118,10 @@ namespace Synctool.Views
                 {
                     using var db = new AppDbContext();
                     
-                    // 1. Sadece sistemde (CostCalculations) kayıtlı olan kodları filtrele
+                    var allCodes = triggerCodes.Concat(targetCodes).Distinct().ToList();
+
                     var validCodes = db.CostCalculations
-                        .Where(c => c.SourceTable == categoryTag && codes.Contains(c.ProductCode.Trim()))
+                        .Where(c => c.SourceTable == categoryTag && allCodes.Contains(c.ProductCode.Trim()))
                         .Select(c => c.ProductCode.Trim())
                         .Distinct()
                         .ToList();
@@ -110,32 +131,54 @@ namespace Synctool.Views
                         throw new InvalidOperationException("Girdiğiniz kodların hiçbiri seçili kategoride sistemde kayıtlı değil. Lütfen kodları kontrol edin.");
                     }
 
-                    // 2. Yeni Kampanya Başlığı
                     var campaign = new ManualCampaign
                     {
                         Description = description,
                         Category = categoryTag,
+                        DiscountPrice = discountPrice,
                         CreatedAt = DateTime.Now
                     };
                     db.ManualCampaigns.Add(campaign);
                     db.SaveChanges();
 
-                    // 4. Sadece geçerli ürünleri bağla
-                    var products = validCodes.Select(code => new ManualCampaignProduct
+                    var products = new List<ManualCampaignProduct>();
+
+                    foreach (var code in triggerCodes)
                     {
-                        ManualCampaignId = campaign.Id,
-                        ProductCode = code
-                    }).ToList();
+                        if (validCodes.Contains(code))
+                        {
+                            products.Add(new ManualCampaignProduct
+                            {
+                                ManualCampaignId = campaign.Id,
+                                ProductCode = code,
+                                IsTargetProduct = false
+                            });
+                        }
+                    }
+
+                    foreach (var code in targetCodes)
+                    {
+                        if (validCodes.Contains(code))
+                        {
+                            products.Add(new ManualCampaignProduct
+                            {
+                                ManualCampaignId = campaign.Id,
+                                ProductCode = code,
+                                IsTargetProduct = true
+                            });
+                        }
+                    }
 
                     db.ManualCampaignProducts.AddRange(products);
                     db.SaveChanges();
-                    savedCount = validCodes.Count;
+                    savedCount = products.Count;
                 });
 
                 MainSnackbar.MessageQueue?.Enqueue($"✅ {savedCount} geçerli ürün için kampanya tanımlandı.");
                 
-                // Temizle
-                TxtProductCodes.Text = "";
+                TxtTriggerProductCodes.Text = "";
+                TxtTargetProductCodes.Text = "";
+                TxtDiscountPrice.Text = "";
                 TxtDescription.Text = "";
                 UpdatePreview();
             }

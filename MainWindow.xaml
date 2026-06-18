@@ -689,6 +689,17 @@
                                                 <TextBlock x:Name="TxtCartTotalCard" Text="0,00 ₺" HorizontalAlignment="Right" FontSize="18" FontWeight="ExtraBold" Foreground="#E02020"/>
                                             </Grid>
                                         </Border>
+                                        
+                                        <Button Margin="0,16,0,0"
+                                                Style="{StaticResource MaterialDesignRaisedButton}" 
+                                                Background="#4F46E5" BorderBrush="#4F46E5" Foreground="White"
+                                                Height="42" materialDesign:ButtonAssist.CornerRadius="12"
+                                                Click="BtnCheckCampaigns_Click">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="TicketPercentOutline" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Kampanyaları Kontrol Et" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
                                     </StackPanel>
                                 </Border>
                             </Grid>

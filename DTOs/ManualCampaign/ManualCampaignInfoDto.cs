@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +9,7 @@ namespace Synctool.DTOs
         public int Id { get; set; }
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
+        public decimal? DiscountPrice { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<ManualCampaignProductDto> Products { get; set; } = new();
 

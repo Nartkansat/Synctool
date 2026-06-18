@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,6 +14,8 @@ namespace Synctool.Models
         
         [Required]
         public string Category { get; set; } = string.Empty;
+        
+        public decimal? DiscountPrice { get; set; }
         
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
@@ -31,5 +33,7 @@ namespace Synctool.Models
         
         [Required]
         public string ProductCode { get; set; } = string.Empty;
+        
+        public bool IsTargetProduct { get; set; }
     }
 }

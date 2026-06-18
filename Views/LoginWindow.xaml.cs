@@ -49,7 +49,7 @@ namespace Synctool.Views
                 // Bağlantı başarısız — "Tekrar Dene" butonlu dialog göster
                 ShowRetryDialog(
                     "Sunucu Bağlantı Hatası",
-                    "Veritabanı sunucusuna 3 deneme sonrası bağlanılamadı.\n\n" +
+                    $"Veritabanı sunucusuna 3 deneme sonrası bağlanılamadı.\n\nHata Detayı: {AppDbContext.LastConnectionError}\n\n" +
                     "Olası nedenler:\n" +
                     "• Ana bilgisayar kapalı olabilir\n" +
                     "• Ağ bağlantınızda sorun olabilir\n" +

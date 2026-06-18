@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Synctool.Views.ExcelIslemleriView"
+<UserControl x:Class="Synctool.Views.ExcelIslemleriView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -148,7 +148,7 @@
                     <TextBlock Text="Manuel Oliz İndirimi Ekle / Güncelle" FontSize="18" FontWeight="Bold" Margin="0,0,0,16" Foreground="#1E293B"/>
                     <TextBlock Text="Bu işlem sistemdeki en son Oliz dosyasına yeni bir indirim ekler veya mevcut olanı günceller." FontSize="12" Foreground="#64748B" Margin="0,0,0,16" TextWrapping="Wrap"/>
                     <TextBox x:Name="TxtManualOlizCode" materialDesign:HintAssist.Hint="Ürün Kodu (Örn: 2030 mb)" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
-                    <TextBox x:Name="TxtManualOlizDiscount" materialDesign:HintAssist.Hint="Net İndirim Tutarı (Örn: 5000)" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,24"/>
+                    <TextBox x:Name="TxtManualOlizDiscount" materialDesign:HintAssist.Hint="İndirim Tutarı (Örn: 6500)" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,24"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="İptal" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0" Click="BtnCancelManualOliz_Click"/>
                         <Button Content="Kaydet" Style="{StaticResource MaterialDesignRaisedButton}" Background="#E02020" BorderBrush="#E02020" Foreground="White" Click="BtnSaveManualOliz_Click"/>

@@ -580,6 +580,20 @@ namespace Synctool
             ShowModernToast("Sepet temizlendi.");
         }
 
+        private void BtnCheckCampaigns_Click(object sender, RoutedEventArgs e)
+        {
+            if (CartService.Instance.Items.Count == 0)
+            {
+                ShowModernToast("Sepetinizde kampanya kontrolü yapılacak ürün bulunmuyor.");
+                return;
+            }
+
+            PopupCart.IsOpen = false; // Hide the cart popup first
+            var campaignWindow = new Views.CampaignCheckWindow(CartService.Instance.Items.ToList());
+            campaignWindow.Owner = this;
+            campaignWindow.ShowDialog();
+        }
+
         #endregion
 
         private void BtnLogout_Click(object? sender, RoutedEventArgs? e)

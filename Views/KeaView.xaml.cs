@@ -108,13 +108,21 @@ namespace Synctool.Views
 
                     var campaigns = db.ManualCampaignProducts
                         .Where(mcp => !string.IsNullOrEmpty(mcp.ProductCode))
-                        .Select(mcp => new { mcp.ProductCode, mcp.ManualCampaign.Description })
+                        .Select(mcp => new { 
+                            mcp.ProductCode, 
+                            mcp.ManualCampaign.Description,
+                            mcp.ManualCampaign.DiscountPrice,
+                            mcp.IsTargetProduct
+                        })
                         .AsNoTracking()
                         .AsEnumerable()
                         .GroupBy(x => x.ProductCode)
                         .ToDictionary(
                             g => g.Key,
-                            g => string.Join("\n\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n", g.Select(x => x.Description))
+                            g => string.Join("\n\n─────────────────\n\n", g.Select(x => 
+                                $"{(x.IsTargetProduct ? "🎯 [İndirimli Verilecek Ürün]" : "⭐ [Kampanya Ana Ürünü]")}" +
+                                (x.DiscountPrice.HasValue ? $"\n💰 İndirim Tutarı: {x.DiscountPrice.Value:N2} ₺" : "") +
+                                $"\n📝 Detay: {x.Description}"))
                         );
 
                     var olizCampaigns = db.OlizCampaigns

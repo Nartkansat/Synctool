@@ -1,4 +1,4 @@
-﻿using Synctool.Data;
+using Synctool.Data;
 using Synctool.DTOs;
 using Synctool.Models;
 using Microsoft.EntityFrameworkCore;
@@ -108,11 +108,13 @@ namespace Synctool.Views
                         Id = c.Id,
                         Description = c.Description,
                         Category = c.Category == "WhiteGoods" ? "Beyaz Eşya" : "KEA",
+                        DiscountPrice = c.DiscountPrice,
                         CreatedAt = c.CreatedAt,
                         Products = c.Products.Select(p => new ManualCampaignProductDto
                         {
                             ProductCode = p.ProductCode,
-                            ProductName = productNames.TryGetValue(p.ProductCode, out var name) ? name : "Bilinmeyen Ürün"
+                            ProductName = productNames.TryGetValue(p.ProductCode, out var name) ? name : "Bilinmeyen Ürün",
+                            IsTargetProduct = p.IsTargetProduct
                         }).ToList()
                     }).ToList();
                 });
