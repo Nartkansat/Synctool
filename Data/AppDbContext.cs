@@ -85,8 +85,8 @@ namespace Synctool.Data
             if (!options.IsConfigured)
             {
                 // Anabilgisayar ip adresi, db ye oradan baglaniliyor.
-                //var connectionString = "Server=192.168.1.198;Port=3306;Database=ArcelikExcelDb;User=arcelik;Password=ArcelikWifi01;Pooling=true;MinimumPoolSize=2;MaximumPoolSize=10;ConnectionTimeout=15;DefaultCommandTimeout=15;";
-                var connectionString = "Server=localhost;Port=3306;Database=ArcelikExcelDb;User=root;Password=os-Q^-)28FUhAt;Pooling=true;MinimumPoolSize=2;MaximumPoolSize=10;ConnectionTimeout=15;DefaultCommandTimeout=15;";
+                var connectionString = "Server=192.168.1.198;Port=3306;Database=ArcelikExcelDb;User=arcelik;Password=ArcelikWifi01;Pooling=true;MinimumPoolSize=2;MaximumPoolSize=10;ConnectionTimeout=15;DefaultCommandTimeout=15;";
+                //var connectionString = "Server=localhost;Port=3306;Database=ArcelikExcelDb;User=root;Password=os-Q^-)28FUhAt;Pooling=true;MinimumPoolSize=2;MaximumPoolSize=10;ConnectionTimeout=15;DefaultCommandTimeout=15;";
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             }
         }
