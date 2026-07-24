@@ -413,6 +413,10 @@ namespace Synctool
                         SetPageHeader("Kampanya Yönetimi", "Manuel kampanya tanımları ve yönetimi", PackIconKind.TagPlus, "#E11D48", "#FFF1F2");
                         MainContentControl.Content = new ManualCampaignView();
                         break;
+                    case "RegionalCampaign":
+                        SetPageHeader("Bölgesel Kampanyalar", "Bölgesel kampanya indirimleri ve yönetimi", PackIconKind.MapMarker, "#0284C7", "#F0F9FF");
+                        MainContentControl.Content = new RegionalCampaignView();
+                        break;
                     case "UserManagement":
                         if (AuthService.CurrentUser?.Role != "Admin")
                         {

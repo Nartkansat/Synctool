@@ -31,6 +31,7 @@ namespace Synctool.Views
             public bool HasCampaign { get; set; }
             public string HasCampaignDisplay => HasCampaign ? "✔ Evet" : "✘ Hayır";
             public string CampaingDate { get; set; } = string.Empty;
+            public bool IsRegionalCampaign => CampaingDate == "Bölgesel Kampanya";
         }
 
         private class FileSelectionWrapper : System.ComponentModel.INotifyPropertyChanged
@@ -240,6 +241,12 @@ namespace Synctool.Views
                     .GroupBy(c => c.ProductCode.Trim().ToUpperInvariant())
                     .ToDictionary(g => g.Key, g => g.First());
 
+                // --- Bölgesel Kampanyaları (JSON) yükle ---
+                var regionalLookup = RegionalCampaignService.GetAll()
+                    .Where(r => !string.IsNullOrWhiteSpace(r.ProductCode))
+                    .GroupBy(r => r.ProductCode.Trim().ToUpperInvariant())
+                    .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
                 var rows = new List<CostRow>();
 
                 // --- KEA ürünleri ---
@@ -252,7 +259,7 @@ namespace Synctool.Views
                     foreach (var kea in keaProducts)
                         rows.Add(BuildRow(kea.Id.ToString(), kea.ProductCode, kea.Description, kea.ProductName, "KEA",
                                           GetPricePP(kea, pricePPSource), pricePPSource,
-                                          markupPct, campaignLookup));
+                                          markupPct, campaignLookup, regionalLookup));
                 }
 
                 // --- Beyaz Eşya ürünleri ---
@@ -268,7 +275,7 @@ namespace Synctool.Views
                         string wgValor = ValorSettingsService.GetValor(wg.ExcelFileType);
                         rows.Add(BuildRow(wg.Id.ToString(), wg.ProductCode, wg.Description, wg.ProductName, "Beyaz Eşya",
                                           GetPricePPWG(wg, wgValor), wgValor,
-                                          markupPct, campaignLookup));
+                                          markupPct, campaignLookup, regionalLookup));
                     }
 
                     // --- Kampanyası olan ama fiyat listesinde bulunmayan ürünler ---
@@ -293,7 +300,8 @@ namespace Synctool.Views
                                 0m,                       // Fiyat bilgisi yok
                                 "Kampanya",               // Kaynak olarak "Kampanya" göster
                                 markupPct,
-                                campaignLookup));
+                                campaignLookup,
+                                regionalLookup));
                         }
                     }
                 }
@@ -336,29 +344,46 @@ namespace Synctool.Views
         private static CostRow BuildRow(
             string productId, string productCode, string description, string productName, string kategori,
             decimal pricePP, string pricePPSource, decimal markupPct,
-            Dictionary<string, OlizCampaign> campaignLookup)
+            Dictionary<string, OlizCampaign> campaignLookup,
+            Dictionary<string, RegionalCampaignItem> regionalLookup)
         {
             OlizCampaign? campaign = null;
+            RegionalCampaignItem? regionalCamp = null;
             string codeKey = productCode?.Trim().ToUpperInvariant() ?? string.Empty;
             bool hasCampaign = false;
+            decimal priceConversion = 0m;
+            string campaignDate = string.Empty;
 
-            if (!string.IsNullOrEmpty(codeKey))
+            // 1. ÖNCE BÖLGESEL KAMPANYA KONTROLÜ (JSON Öncelikli)
+            if (!string.IsNullOrEmpty(codeKey) && regionalLookup.TryGetValue(codeKey, out regionalCamp))
             {
-                hasCampaign = campaignLookup.TryGetValue(codeKey, out campaign);
+                hasCampaign = true;
+                priceConversion = Math.Round(regionalCamp.DiscountAmount * 0.85m, 2); // Brüt İndirimin %85'i Net İndirimdir (Örn: 6.000 TL -> 5.100 TL)
+                campaignDate = "Bölgesel Kampanya";
+            }
+            // 2. BÖLGESEL KAMPANYA YOKSA STANDART OLİZ KAMPANYASI KONTROLÜ
+            else
+            {
+                if (!string.IsNullOrEmpty(codeKey))
+                {
+                    hasCampaign = campaignLookup.TryGetValue(codeKey, out campaign);
+                }
+
+                if (!hasCampaign && !string.IsNullOrWhiteSpace(description))
+                {
+                    string descKey = description.Trim().ToUpperInvariant();
+                    hasCampaign = campaignLookup.TryGetValue(descKey, out campaign);
+                }
+
+                if (hasCampaign && campaign != null)
+                {
+                    priceConversion = campaign.DiscountNetAmount;
+                    campaignDate = $"{campaign.CampaignStartDate} - {campaign.CampaignEndDate}";
+                }
             }
 
-            if (!hasCampaign && !string.IsNullOrWhiteSpace(description))
-            {
-                string descKey = description.Trim().ToUpperInvariant();
-                hasCampaign = campaignLookup.TryGetValue(descKey, out campaign);
-            }
-
-            decimal priceConversion   = hasCampaign ? campaign!.DiscountNetAmount : 0m;
             decimal purchasePrice     = pricePP - priceConversion;
             decimal cardPurchasePrice = Math.Round(purchasePrice * (1 + markupPct / 100m), 2);
-            string campaignDate       = hasCampaign
-                ? $"{campaign!.CampaignStartDate} - {campaign.CampaignEndDate}"
-                : string.Empty;
 
             return new CostRow
             {

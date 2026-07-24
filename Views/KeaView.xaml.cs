@@ -137,6 +137,12 @@ namespace Synctool.Views
                             StringComparer.OrdinalIgnoreCase
                         );
 
+                    // Bölgesel Kampanyaları (JSON) yükle
+                    var regionalCampaigns = RegionalCampaignService.GetAll()
+                        .Where(r => !string.IsNullOrWhiteSpace(r.ProductCode))
+                        .GroupBy(r => r.ProductCode.Trim())
+                        .ToDictionary(g => g.Key, g => g.First().DiscountAmount, StringComparer.OrdinalIgnoreCase);
+
                     var keaProducts = db.KeaProducts
                         .Where(p => !string.IsNullOrEmpty(p.ProductCode))
                         .Select(p => new {
@@ -171,6 +177,14 @@ namespace Synctool.Views
                             excelFileType = kp.ExcelFileType;
                         }
 
+                        // Bölgesel Kampanya Kontrolü (JSON Öncelikli)
+                        bool hasRegional = regionalCampaigns.TryGetValue(key, out var grossRegionalDiscount);
+                        decimal priceConversion = hasRegional ? Math.Round(grossRegionalDiscount * 0.85m, 2) : c.PriceConversion; // Brüt %85 -> Net İndirim (Örn: 6.000 TL -> 5.100 TL)
+                        decimal purchasePrice = hasRegional ? Math.Max(0, c.PricePP - priceConversion) : c.PurchasePrice;
+                        decimal cardPurchasePrice = hasRegional ? Math.Round(purchasePrice * (1 + c.CardMarkupPercent / 100m), 2) : c.CardPurchasePrice;
+                        string campaingDate = hasRegional ? "Bölgesel Kampanya" : c.CampaingDate;
+                        decimal discountAmount = hasRegional ? grossRegionalDiscount : (olizCampaigns.TryGetValue(key, out var disc) ? disc : 0m);
+
                         return new CalculationDisplayItem
                         {
                             Id = c.Id,
@@ -180,14 +194,14 @@ namespace Synctool.Views
                             SourceTable = c.SourceTable ?? string.Empty,
                             PricePP = c.PricePP,
                             PricePPSource = c.PricePPSource,
-                            PriceConversion = c.PriceConversion,
-                            PurchasePrice = c.PurchasePrice,
+                            PriceConversion = priceConversion,
+                            PurchasePrice = purchasePrice,
                             CardMarkupPercent = c.CardMarkupPercent,
-                            CardPurchasePrice = c.CardPurchasePrice,
-                            CampaingDate = c.CampaingDate,
+                            CardPurchasePrice = cardPurchasePrice,
+                            CampaingDate = campaingDate,
                             CreatedDate = c.CreatedDate,
                             ManualCampaignText = campaigns.TryGetValue(c.ProductCode ?? string.Empty, out var txt) ? txt : string.Empty,
-                            DiscountAmount = olizCampaigns.TryGetValue(c.ProductCode ?? string.Empty, out var disc) ? disc : 0m,
+                            DiscountAmount = discountAmount,
 
                             CashPrice = cash,
                             WholesalePrice30 = w30,
@@ -195,7 +209,7 @@ namespace Synctool.Views
                             WholesalePrice90 = w90,
                             WholesalePrice120 = w120,
                             OriginalPricePP = c.PricePP,
-                            OriginalPurchasePrice = c.PurchasePrice,
+                            OriginalPurchasePrice = purchasePrice,
                             ExcelFileType = excelFileType
                         };
                     }).ToList();

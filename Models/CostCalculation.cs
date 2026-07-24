@@ -1,4 +1,4 @@
-﻿namespace Synctool.Models
+namespace Synctool.Models
 {
     /// <summary>
     /// Maliyet hesabı sonuçlarını tutan tablo.
@@ -37,6 +37,9 @@
 
         // --- Kampanya Bilgisi ---
         public string CampaingDate { get; set; } = string.Empty; // Kampanya dönemi açıklaması
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public bool IsRegionalCampaign => CampaingDate == "Bölgesel Kampanya";
 
         // --- Kayıt Zamanı ---
         public DateTime CreatedDate { get; set; } = DateTime.Now;
